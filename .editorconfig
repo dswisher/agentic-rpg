@@ -1,0 +1,207 @@
+# EditorConfig for Runewalker
+# Rules aligned with the StyleCop configuration from monogame-river-raid,
+# translated to .NET built-in analyzers (IDE/CA rules).
+# Start strict; relax individual rules as needed with severity = suggestion or none.
+
+root = true
+
+# -------------------------------------------------------------------------
+# All files
+# -------------------------------------------------------------------------
+[*]
+charset = utf-8
+indent_style = space
+indent_size = 4
+end_of_line = lf
+trim_trailing_whitespace = true
+
+# StyleCop SA1518 / stylecop.json layoutRules.newlineAtEndOfFile = require
+insert_final_newline = true
+
+# -------------------------------------------------------------------------
+# C# files
+# -------------------------------------------------------------------------
+[*.cs]
+
+# --- File header (mirrors stylecop.json documentationRules copyright) -----
+# IDE0073: require a file header
+# file_header_template = Copyright (c) Doug Swisher. All Rights Reserved.\nLicensed under the MIT License. See LICENSE.md in the project root for license information.
+# dotnet_diagnostic.IDE0073.severity = warning
+
+# --- using directive placement --------------------------------------------
+# StyleCop SA1200 (usings outside namespace) -> IDE0065
+csharp_using_directive_placement = outside_namespace:warning
+
+# --- Accessibility modifiers ----------------------------------------------
+# StyleCop SA1400-series (access modifiers required) -> IDE0040
+dotnet_style_require_accessibility_modifiers = for_non_interface_members:warning
+
+# --- Readonly fields ------------------------------------------------------
+# StyleCop SA1401 (fields should be private) companion -> IDE0044
+dotnet_style_readonly_field = true:warning
+
+# --- this. qualification --------------------------------------------------
+# SA1101 is DISABLED in river-raid, so we do NOT require this. qualification
+dotnet_style_qualification_for_field = false:warning
+dotnet_style_qualification_for_property = false:warning
+dotnet_style_qualification_for_method = false:warning
+dotnet_style_qualification_for_event = false:warning
+
+# --- Language keywords vs framework type names ----------------------------
+# StyleCop SA1121 (use built-in type alias) -> IDE0049
+dotnet_style_predefined_type_for_locals_parameters_members = true:warning
+dotnet_style_predefined_type_for_member_access = true:warning
+
+# --- Braces ---------------------------------------------------------------
+# StyleCop SA1503 (braces for multi-line) -> IDE0011
+csharp_prefer_braces = true:warning
+
+# --- Namespace style ------------------------------------------------------
+# Block-scoped namespaces
+csharp_style_namespace_declarations = block_scoped:warning
+
+# --- Namespace matches folder structure -----------------------------------
+# IDE0130
+dotnet_style_namespace_match_folder = true:warning
+
+# --- var usage ------------------------------------------------------------
+# Prefer var everywhere
+csharp_style_var_for_built_in_types = true:warning
+csharp_style_var_when_type_is_apparent = true:warning
+csharp_style_var_elsewhere = true:warning
+
+# --- Expression-bodied members -------------------------------------------
+# Allow but do not require expression bodies (StyleCop has no strong opinion)
+csharp_style_expression_bodied_methods = false:silent
+csharp_style_expression_bodied_constructors = false:silent
+csharp_style_expression_bodied_operators = false:silent
+csharp_style_expression_bodied_properties = true:silent
+csharp_style_expression_bodied_indexers = true:silent
+csharp_style_expression_bodied_accessors = true:silent
+csharp_style_expression_bodied_lambdas = true:silent
+csharp_style_expression_bodied_local_functions = false:silent
+
+# --- Pattern matching -----------------------------------------------------
+csharp_style_pattern_matching_over_is_with_cast_check = true:warning
+csharp_style_pattern_matching_over_as_with_null_check = true:warning
+csharp_style_prefer_switch_expression = true:warning
+csharp_style_prefer_pattern_matching = true:warning
+csharp_style_prefer_not_pattern = true:warning
+
+# --- Null checks ----------------------------------------------------------
+dotnet_style_null_propagation = true:warning
+dotnet_style_coalesce_expression = true:warning
+dotnet_style_prefer_is_null_check_over_reference_equality_method = true:warning
+
+# --- Object / collection initializers ------------------------------------
+dotnet_style_object_initializer = true:warning
+dotnet_style_collection_initializer = true:warning
+
+# --- Unused code ----------------------------------------------------------
+# IDE0051, IDE0052, IDE0059, IDE0060
+dotnet_code_quality_unused_parameters = all:warning
+
+# --- Blank lines ----------------------------------------------------------
+# SA1507 was DISABLED in river-raid, so we do not restrict multiple blank lines
+# SA1516 / SA1512 (blank line rules) -> IDE2003
+dotnet_style_allow_statement_immediately_after_block_experimental = false:warning
+
+# --- Formatting (IDE0055) -------------------------------------------------
+# Indentation
+csharp_indent_block_contents = true
+csharp_indent_braces = false
+csharp_indent_case_contents = true
+csharp_indent_case_contents_when_block = true
+csharp_indent_switch_labels = true
+csharp_indent_labels = one_less_than_current
+
+# New lines
+csharp_new_line_before_open_brace = all             # SA1500 / SA1503
+csharp_new_line_before_else = true
+csharp_new_line_before_catch = true
+csharp_new_line_before_finally = true
+csharp_new_line_before_members_in_object_initializers = true
+csharp_new_line_before_members_in_anonymous_types = true
+csharp_new_line_between_query_expression_clauses = true
+
+# Spaces (StyleCop SA1000-series)
+csharp_space_after_cast = false
+csharp_space_after_keywords_in_control_flow_statements = true
+csharp_space_between_method_declaration_parameter_list_parentheses = false
+csharp_space_between_method_call_parameter_list_parentheses = false
+csharp_space_between_parentheses = false
+csharp_space_before_colon_in_inheritance_clause = true
+csharp_space_after_colon_in_inheritance_clause = true
+csharp_space_around_binary_operators = before_and_after
+csharp_space_between_method_declaration_empty_parameter_list_parentheses = false
+csharp_space_between_method_call_name_and_opening_parenthesis = false
+csharp_space_between_method_call_empty_parameter_list_parentheses = false
+csharp_space_after_comma = true
+csharp_space_before_comma = false
+csharp_space_after_dot = false
+csharp_space_before_dot = false
+csharp_space_after_semicolon_in_for_statement = true
+csharp_space_before_semicolon_in_for_statement = false
+
+# Wrapping
+csharp_preserve_single_line_statements = false
+csharp_preserve_single_line_blocks = true
+
+dotnet_diagnostic.IDE0055.severity = warning
+
+# --- Ordering (SA1200-series) --------------------------------------------
+# SA1204 (static before non-static) is DISABLED in river-raid; leave as silent
+# SA1210 (using directives alphabetical) has no direct IDE equivalent; handled by IDE0065 placement above
+
+# --- Naming conventions --------------------------------------------------
+
+# Private fields: camelCase (no underscore prefix)
+dotnet_naming_style.private_field_style.capitalization = camel_case
+dotnet_naming_style.private_field_style.required_prefix =
+
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+dotnet_naming_symbols.private_fields.required_modifiers =
+
+dotnet_naming_rule.private_fields_naming.symbols = private_fields
+dotnet_naming_rule.private_fields_naming.style = private_field_style
+dotnet_naming_rule.private_fields_naming.severity = warning
+
+# Constants: PascalCase
+dotnet_naming_style.const_style.capitalization = pascal_case
+
+dotnet_naming_symbols.constants.applicable_kinds = field
+dotnet_naming_symbols.constants.applicable_accessibilities = *
+dotnet_naming_symbols.constants.required_modifiers = const
+
+dotnet_naming_rule.constants_naming.symbols = constants
+dotnet_naming_rule.constants_naming.style = const_style
+dotnet_naming_rule.constants_naming.severity = warning
+
+# IDE1006 must also be set explicitly for the naming rule to fire during dotnet build
+dotnet_diagnostic.IDE1006.severity = warning
+
+# --- Documentation -------------------------------------------------------
+# SA1600 and SA0001 are DISABLED in river-raid, so we do NOT require XML doc comments
+dotnet_diagnostic.CS1591.severity = none
+
+# --- Suppressed rules ----------------------------------------------------
+# IDE0078: Use pattern matching (e.g. 'x is not Foo') instead of != comparisons.
+# Disabled because old-school if statements are considered more readable here.
+dotnet_diagnostic.IDE0078.severity = none
+
+# CA1716: namespace/type matches a VB reserved keyword — C#-only project.
+dotnet_diagnostic.CA1716.severity = none
+# CA1848: LoggerMessage delegates — inline logging preferred for readability.
+dotnet_diagnostic.CA1848.severity = none
+# CA1873: Same family as CA1848.
+dotnet_diagnostic.CA1873.severity = none
+# CA1305: IFormatProvider not specified — current culture intentional for display.
+dotnet_diagnostic.CA1305.severity = none
+
+# -------------------------------------------------------------------------
+# Test projects — relax some rules that are noisy in tests
+# -------------------------------------------------------------------------
+[test/**/*.cs]
+# Unused parameters common in test fixture setup
+dotnet_code_quality_unused_parameters = non_public:warning
