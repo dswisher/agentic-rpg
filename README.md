@@ -1,0 +1,27 @@
+# `Microsoft.Extensions.AI` Proof of Concept
+
+Exploring LLM chat in C# with `Microsoft.Extensions.AI` (MEAI), with a focus on managing conversation context.
+
+## Setup
+
+Config lives outside the repo, in `~/.config/meai-poc/config.jsonc` (`chmod 600`):
+
+```jsonc
+{
+  "bearerToken": "<bedrock-api-key>",
+  "modelId": "<inference-profile-id>",
+  "regionName": "us-east-1"
+}
+```
+
+## Steps
+
+- [x] Stateless calls: the model has no memory between calls
+- [x] Manual history loop: every turn re-sends the whole conversation
+- [ ] System prompts: `ChatRole.System` message vs. `ChatOptions.Instructions`
+- [ ] Streaming: `GetStreamingResponseAsync`, rebuilding the message for history
+- [ ] Token usage: watch input tokens grow each turn
+- [ ] Context strategies: sliding window, token budget, summarization
+- [ ] Middleware: `ChatClientBuilder`, `.UseLogging()`, a trimming `DelegatingChatClient`
+- [ ] Tool calling: `AIFunctionFactory`, `.UseFunctionInvocation()`
+

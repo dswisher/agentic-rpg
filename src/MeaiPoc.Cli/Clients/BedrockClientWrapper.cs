@@ -1,0 +1,27 @@
+using Amazon.BedrockRuntime;
+using Microsoft.Extensions.AI;
+
+namespace MeaiPoc.Cli.Clients
+{
+    public sealed class BedrockClientWrapper : IChatClientWrapper
+    {
+        private readonly AmazonBedrockRuntimeClient runtime;
+
+
+        public BedrockClientWrapper(AmazonBedrockRuntimeClient runtime, IChatClient chat)
+        {
+            this.runtime = runtime;
+            Chat = chat;
+        }
+
+
+        public IChatClient Chat { get; }
+
+
+        public void Dispose()
+        {
+            Chat.Dispose();
+            runtime.Dispose();
+        }
+    }
+}

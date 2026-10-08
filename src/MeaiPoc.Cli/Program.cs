@@ -1,71 +1,73 @@
 ﻿using System;
-using System.IO;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using Amazon;
-using Amazon.BedrockRuntime;
-using Amazon.Runtime;
-using MeaiPoc.Cli.Models;
+using MeaiPoc.Cli.Clients;
 using Microsoft.Extensions.AI;
 
 namespace MeaiPoc.Cli
 {
     public static class Program
     {
-        private static readonly JsonSerializerOptions serializerOptions = new()
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            ReadCommentHandling = JsonCommentHandling.Skip,
-            AllowTrailingCommas = true,
-            UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow,
-            RespectNullableAnnotations = true
-        };
-
-
         public static async Task<int> Main()
         {
             try
             {
-                // Read the config
-                var configFilePath = Path.Join(Environment.GetEnvironmentVariable("HOME"), ".config", "meai-poc", "config.jsonc");
+                using var wrapper = await ClientFactory.Create();
 
-                if (!File.Exists(configFilePath))
+                var messages = new List<ChatMessage>();
+
+                using var consoleCancellation = new ConsoleCancellation();
+
+                while (true)
                 {
-                    throw new FileNotFoundException($"Config file not found: {configFilePath}");
+                    Console.Write("> ");
+                    var input = Console.ReadLine();
+
+                    if (input == null)
+                    {
+                        break;  // EOF
+                    }
+
+                    if (string.IsNullOrEmpty(input))
+                    {
+                        continue;
+                    }
+
+                    if (input.Equals("/quit", StringComparison.OrdinalIgnoreCase))
+                    {
+                        break;
+                    }
+
+                    var userMessage = new ChatMessage(ChatRole.User, input);
+
+                    var cancellationToken = consoleCancellation.BeginRequest();
+
+                    ChatResponse response;
+                    try
+                    {
+                        response = await wrapper.Chat.GetResponseAsync([.. messages, userMessage], cancellationToken: cancellationToken);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        Console.WriteLine("[cancelled]");
+                        continue;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Error getting response from chat client:");
+                        Console.WriteLine(ex);
+                        continue;
+                    }
+                    finally
+                    {
+                        consoleCancellation.EndRequest();
+                    }
+
+                    Console.WriteLine(response.Text);
+
+                    messages.Add(userMessage);
+                    messages.AddMessages(response);
                 }
-
-                Console.WriteLine($"Reading config file: {configFilePath}...");
-
-                ConfigFile? config;
-                await using (var stream = File.OpenRead(configFilePath))
-                {
-                    config = JsonSerializer.Deserialize<ConfigFile>(stream, serializerOptions);
-                }
-
-                Console.WriteLine("...finished reading config file...");
-
-                if (config == null)
-                {
-                    throw new InvalidOperationException("Failed to deserialize configuration file.");
-                }
-
-                // Set up the AWS config
-                var awsConfig = new AmazonBedrockRuntimeConfig
-                {
-                    RegionEndpoint = RegionEndpoint.USEast1,
-                    AWSTokenProvider = new StaticTokenProvider(config.Key),
-                    AuthSchemePreference = ["httpBearerAuth"], // otherwise SigV4 wins if AWS creds exist
-                };
-
-                Console.WriteLine($"...creating IChatClient, model {config.Model}...");
-                var runtime = new AmazonBedrockRuntimeClient(awsConfig);
-                var chat = runtime.AsIChatClient(config.Model);
-
-                Console.WriteLine("...sending request and awaiting response...");
-                var response = await chat.GetResponseAsync("Say hello in five words.");
-                Console.WriteLine(response.Text);
-                Console.WriteLine($"in={response.Usage?.InputTokenCount} out={response.Usage?.OutputTokenCount}");
 
                 return 0;
             }

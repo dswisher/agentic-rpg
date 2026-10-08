@@ -2,7 +2,8 @@ namespace MeaiPoc.Cli.Models
 {
     public class ConfigFile
     {
-        public required string Key { get; set; }
-        public required string Model { get; set; }
+        public required string BearerToken { get; init; }
+        public required string ModelId { get; init; }
+        public required string RegionName { get; init; }
     }
 }
