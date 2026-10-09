@@ -20,7 +20,7 @@ Config lives outside the repo, in `~/.config/meai-poc/config.jsonc` (`chmod 600`
 - [x] Manual history loop: every turn re-sends the whole conversation
 - [x] System prompts: `ChatRole.System` message vs. `ChatOptions.Instructions`
 - [x] Streaming: `GetStreamingResponseAsync`, rebuilding the message for history
-- [ ] Token usage: watch input tokens grow each turn
+- [x] Token usage: watch input tokens grow each turn
 - [ ] Context strategies: sliding window, token budget, summarization
 - [ ] Middleware: `ChatClientBuilder`, `.UseLogging()`, a trimming `DelegatingChatClient`
 - [ ] Tool calling: `AIFunctionFactory`, `.UseFunctionInvocation()`

@@ -22,6 +22,7 @@ namespace MeaiPoc.Cli
                 {
                     Instructions = """
                                    You are an old, wise wizard, tasked with tutoring a rebellious student in the ways of the magic arts.
+                                   Only respond with plain text (no markdown), lines should not be longer than 80 characters.
                                    """
                 };
 
@@ -65,8 +66,15 @@ namespace MeaiPoc.Cli
 
                         Console.WriteLine();
 
+                        var response = updates.ToChatResponse();
+
                         messages.Add(userMessage);
-                        messages.AddMessages(updates);
+                        messages.AddMessages(response);
+
+                        if (response.Usage is { } usage)
+                        {
+                            Console.WriteLine($"[tokens: input={usage.InputTokenCount}, output={usage.OutputTokenCount}, total={usage.TotalTokenCount}]");
+                        }
                     }
                     catch (OperationCanceledException)
                     {
