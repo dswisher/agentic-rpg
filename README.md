@@ -18,8 +18,8 @@ Config lives outside the repo, in `~/.config/meai-poc/config.jsonc` (`chmod 600`
 
 - [x] Stateless calls: the model has no memory between calls
 - [x] Manual history loop: every turn re-sends the whole conversation
-- [ ] System prompts: `ChatRole.System` message vs. `ChatOptions.Instructions`
-- [ ] Streaming: `GetStreamingResponseAsync`, rebuilding the message for history
+- [x] System prompts: `ChatRole.System` message vs. `ChatOptions.Instructions`
+- [x] Streaming: `GetStreamingResponseAsync`, rebuilding the message for history
 - [ ] Token usage: watch input tokens grow each turn
 - [ ] Context strategies: sliding window, token budget, summarization
 - [ ] Middleware: `ChatClientBuilder`, `.UseLogging()`, a trimming `DelegatingChatClient`
