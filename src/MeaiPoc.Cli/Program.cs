@@ -14,16 +14,26 @@ namespace MeaiPoc.Cli
             {
                 using var wrapper = await ClientFactory.Create();
 
+                var chatClient = wrapper.Chat
+                    .AsBuilder()
+                    .UseFunctionInvocation()
+                    .Build();
+
                 var messages = new List<ChatMessage>();
 
                 using var consoleCancellation = new ConsoleCancellation();
 
+                var diceTool = AIFunctionFactory.Create(
+                    (int sides) => DieRoller.RollDice(sides),
+                    name: "roll_dice",
+                    description: "Roll one fair die. The sides value must be between 2 and 1000.");
+
                 var chatOptions = new ChatOptions
                 {
                     Instructions = """
-                                   You are an old, wise wizard, tasked with tutoring a rebellious student in the ways of the magic arts.
                                    Only respond with plain text (no markdown), lines should not be longer than 80 characters.
-                                   """
+                                   """,
+                    Tools = [diceTool]
                 };
 
                 while (true)
@@ -55,7 +65,7 @@ namespace MeaiPoc.Cli
                         var updates = new List<ChatResponseUpdate>();
 
                         await foreach (var update in
-                                       wrapper.Chat.GetStreamingResponseAsync(
+                                       chatClient.GetStreamingResponseAsync(
                                            [.. messages, userMessage],
                                            chatOptions,
                                            cancellationToken))

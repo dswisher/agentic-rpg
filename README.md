@@ -21,7 +21,7 @@ Config lives outside the repo, in `~/.config/meai-poc/config.jsonc` (`chmod 600`
 - [x] System prompts: `ChatRole.System` message vs. `ChatOptions.Instructions`
 - [x] Streaming: `GetStreamingResponseAsync`, rebuilding the message for history
 - [x] Token usage: watch input tokens grow each turn
-- [ ] Tool calling: `AIFunctionFactory`, `.UseFunctionInvocation()`
-- [ ] Context strategies: sliding window, token budget, summarization
+- [x] Tool calling: `AIFunctionFactory`, `.UseFunctionInvocation()`
 - [ ] Middleware: `ChatClientBuilder`, `.UseLogging()`, a trimming `DelegatingChatClient`
+- [ ] Context strategies: sliding window, token budget, summarization
 
