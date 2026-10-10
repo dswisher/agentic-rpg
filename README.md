@@ -4,7 +4,7 @@ Exploring LLM chat in C# with `Microsoft.Extensions.AI` (MEAI), with a focus on 
 
 ## Setup
 
-Config lives outside the repo, in `~/.config/meai-poc/config.jsonc` (`chmod 600`):
+Config lives outside the repo, in `~/.config/agentic-rpg/config.jsonc` (`chmod 600`):
 
 ```jsonc
 {

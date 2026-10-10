@@ -3,12 +3,12 @@ using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using AgenticRpg.Cli.Models;
 using Amazon;
 using Amazon.BedrockRuntime;
 using Amazon.Runtime;
-using MeaiPoc.Cli.Models;
 
-namespace MeaiPoc.Cli.Clients
+namespace AgenticRpg.Cli.Clients
 {
     public static class ClientFactory
     {
@@ -26,7 +26,7 @@ namespace MeaiPoc.Cli.Clients
         {
             // Read the config and pick it apart
             var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            var configFilePath = Path.Join(userProfile, ".config", "meai-poc", "config.jsonc");
+            var configFilePath = Path.Join(userProfile, ".config", "agentic-rpg", "config.jsonc");
 
             if (!File.Exists(configFilePath))
             {

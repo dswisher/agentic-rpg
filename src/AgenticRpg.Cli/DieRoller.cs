@@ -1,6 +1,6 @@
 using System;
 
-namespace MeaiPoc.Cli
+namespace AgenticRpg.Cli
 {
     public static class DieRoller
     {

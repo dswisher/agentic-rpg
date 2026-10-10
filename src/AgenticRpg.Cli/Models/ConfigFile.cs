@@ -1,4 +1,4 @@
-namespace MeaiPoc.Cli.Models
+namespace AgenticRpg.Cli.Models
 {
     public class ConfigFile
     {

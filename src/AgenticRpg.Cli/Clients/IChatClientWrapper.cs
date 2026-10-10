@@ -1,7 +1,7 @@
 using System;
 using Microsoft.Extensions.AI;
 
-namespace MeaiPoc.Cli.Clients
+namespace AgenticRpg.Cli.Clients
 {
     public interface IChatClientWrapper : IDisposable
     {

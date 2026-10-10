@@ -7,7 +7,7 @@
 - Progress is tracked in the Steps checklist in README.md.
 
 ## Rules
-- Credentials live only in `~/.config/meai-poc/config.jsonc`. Never print its
+- Credentials live only in `~/.config/agentic-rpg/config.jsonc`. Never print its
   contents or add secrets to the repo.
 
 ## Notes

@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 
-namespace MeaiPoc.Cli
+namespace AgenticRpg.Cli
 {
     public sealed class ConsoleCancellation : IDisposable
     {

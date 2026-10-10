@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MeaiPoc.Cli.Clients;
+using AgenticRpg.Cli.Clients;
 using Microsoft.Extensions.AI;
 
-namespace MeaiPoc.Cli
+namespace AgenticRpg.Cli
 {
     public static class Program
     {
