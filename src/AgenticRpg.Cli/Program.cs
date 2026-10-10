@@ -1,4 +1,7 @@
-﻿using System;
+// Copyright (c) Doug Swisher. All Rights Reserved.
+// Licensed under the MIT License. See LICENSE.md in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AgenticRpg.Cli.Clients;

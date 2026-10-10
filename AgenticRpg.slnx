@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/AgenticRpg.Cli/AgenticRpg.Cli.csproj" />
+    <Project Path="src/AgenticRpg.Tui/AgenticRpg.Tui.csproj" />
   </Folder>
 </Solution>
