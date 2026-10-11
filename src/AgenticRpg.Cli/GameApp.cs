@@ -4,16 +4,19 @@
 using System;
 using System.Threading.Tasks;
 using AgenticRpg.Core.Agents;
+using Microsoft.Extensions.Logging;
 
 namespace AgenticRpg.Cli
 {
     public class GameApp
     {
         private readonly IGameAgent agent;
+        private readonly ILogger<GameApp> logger;
 
-        public GameApp(IGameAgent agent)
+        public GameApp(IGameAgent agent, ILogger<GameApp> logger)
         {
             this.agent = agent;
+            this.logger = logger;
         }
 
 
@@ -52,7 +55,7 @@ namespace AgenticRpg.Cli
 
                     if (response.Usage is { } usage)
                     {
-                        Console.WriteLine($"[tokens: input={usage.InputTokenCount}, output={usage.OutputTokenCount}, total={usage.TotalTokenCount}]");
+                        logger.LogInformation("...tokens: input={InputTokens}, output={OutputTokens}, total={TotalTokens}.", usage.InputTokenCount, usage.OutputTokenCount, usage.TotalTokenCount);
                     }
                 }
                 catch (OperationCanceledException)
@@ -62,8 +65,7 @@ namespace AgenticRpg.Cli
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Error getting response from chat client:");
-                    Console.WriteLine(ex);
+                    logger.LogError(ex, "Error getting response from chat client.");
                 }
                 finally
                 {

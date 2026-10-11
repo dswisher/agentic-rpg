@@ -4,7 +4,6 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace AgenticRpg.Cli
 {
@@ -14,18 +13,7 @@ namespace AgenticRpg.Cli
         {
             try
             {
-                using var loggerFactory = LoggerFactory.Create(logging =>
-                {
-                    logging.AddSimpleConsole(options =>
-                    {
-                        options.SingleLine = true;
-                        options.TimestampFormat = "HH:mm:ss ";
-                    });
-
-                    logging.SetMinimumLevel(LogLevel.Information);
-                });
-
-                await using (var container = await Container.CreateContainerAsync(loggerFactory))
+                await using (var container = Container.CreateContainer())
                 {
                     var gameApp = container.GetRequiredService<GameApp>();
 

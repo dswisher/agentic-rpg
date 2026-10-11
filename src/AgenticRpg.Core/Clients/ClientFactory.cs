@@ -5,7 +5,6 @@ using System;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 using AgenticRpg.Core.Models;
 using Amazon;
 using Amazon.BedrockRuntime;
@@ -15,7 +14,7 @@ using Microsoft.Extensions.Logging;
 
 namespace AgenticRpg.Core.Clients
 {
-    public static class ClientFactory
+    public class ClientFactory : IClientFactory
     {
         private static readonly JsonSerializerOptions serializerOptions = new()
         {
@@ -26,8 +25,17 @@ namespace AgenticRpg.Core.Clients
             RespectNullableAnnotations = true
         };
 
+        private readonly ILoggerFactory loggerFactory;
+        private readonly ILogger<ClientFactory> logger;
 
-        public static async Task<IChatClientWrapper> Create(ILoggerFactory loggerFactory)
+        public ClientFactory(ILoggerFactory loggerFactory, ILogger<ClientFactory> logger)
+        {
+            this.loggerFactory = loggerFactory;
+            this.logger = logger;
+        }
+
+
+        public IChatClientWrapper Create()
         {
             // Read the config and pick it apart
             var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
@@ -38,10 +46,10 @@ namespace AgenticRpg.Core.Clients
                 throw new FileNotFoundException($"Config file not found: {configFilePath}");
             }
 
-            Console.WriteLine($"Reading config file: {configFilePath}...");
+            logger.LogInformation("...reading config file {ConfigFilePath}", configFilePath);
 
             ConfigFile? config;
-            await using (var stream = File.OpenRead(configFilePath))
+            using (var stream = File.OpenRead(configFilePath))
             {
                 config = JsonSerializer.Deserialize<ConfigFile>(stream, serializerOptions);
             }
@@ -61,7 +69,7 @@ namespace AgenticRpg.Core.Clients
                 AuthSchemePreference = ["httpBearerAuth"], // otherwise SigV4 wins if AWS creds exist
             };
 
-            Console.WriteLine($"...creating IChatClient, model {config.ModelId}...");
+            logger.LogInformation("...creating bedrock IChatClient, model {ModelId}...", config.ModelId);
             var runtime = new AmazonBedrockRuntimeClient(awsConfig);
             var client = runtime.AsIChatClient(config.ModelId)
                 .AsBuilder()

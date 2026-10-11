@@ -1,26 +1,37 @@
 // Copyright (c) Doug Swisher. All Rights Reserved.
 // Licensed under the MIT License. See LICENSE.md in the project root for license information.
 
-using System.Threading.Tasks;
 using AgenticRpg.Core;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using Serilog;
 
 namespace AgenticRpg.Cli
 {
     public static class Container
     {
-        public static async Task<ServiceProvider> CreateContainerAsync(ILoggerFactory loggerFactory)
+        public static ServiceProvider CreateContainer()
         {
             // Create the collection that we'll populate with goodies
             var services = new ServiceCollection();
 
-            // Populate it
-            await services.AddCoreServicesAsync(loggerFactory);
+            // Set up logging
+            var serilog = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .Enrich.FromLogContext()
+                .Enrich.With<ShortSourceContextEnricher>()
+                .WriteTo.Console(outputTemplate:
+                    "{Timestamp:HH:mm:ss} [{Level:u3}] {SourceContextShort,-18}: {Message:lj}{NewLine}{Exception}")
+                .CreateLogger();
 
-            services.AddLogging();
-            services.Replace(ServiceDescriptor.Singleton(loggerFactory));
+            services.AddLogging(logging =>
+            {
+                logging.ClearProviders();
+                logging.AddSerilog(serilog, dispose: true);
+            });
+
+            // Populate it
+            services.AddCoreServices();
 
             services.AddSingleton<GameApp>();
 
