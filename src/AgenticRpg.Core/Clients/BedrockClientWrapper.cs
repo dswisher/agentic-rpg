@@ -4,7 +4,7 @@
 using Amazon.BedrockRuntime;
 using Microsoft.Extensions.AI;
 
-namespace AgenticRpg.Cli.Clients
+namespace AgenticRpg.Core.Clients
 {
     public sealed class BedrockClientWrapper : IChatClientWrapper
     {

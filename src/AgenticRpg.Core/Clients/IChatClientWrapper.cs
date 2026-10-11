@@ -4,7 +4,7 @@
 using System;
 using Microsoft.Extensions.AI;
 
-namespace AgenticRpg.Cli.Clients
+namespace AgenticRpg.Core.Clients
 {
     public interface IChatClientWrapper : IDisposable
     {

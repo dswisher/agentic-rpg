@@ -2,7 +2,12 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
     </PropertyGroup>
+
     <ItemGroup>
       <PackageReference Include="Terminal.Gui" Version="2.5.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\AgenticRpg.Core\AgenticRpg.Core.csproj" />
     </ItemGroup>
 </Project>

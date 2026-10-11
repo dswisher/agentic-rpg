@@ -6,12 +6,13 @@ using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using AgenticRpg.Cli.Models;
+using AgenticRpg.Core.Models;
 using Amazon;
 using Amazon.BedrockRuntime;
 using Amazon.Runtime;
+using Microsoft.Extensions.AI;
 
-namespace AgenticRpg.Cli.Clients
+namespace AgenticRpg.Core.Clients
 {
     public static class ClientFactory
     {
@@ -61,7 +62,10 @@ namespace AgenticRpg.Cli.Clients
 
             Console.WriteLine($"...creating IChatClient, model {config.ModelId}...");
             var runtime = new AmazonBedrockRuntimeClient(awsConfig);
-            var client = runtime.AsIChatClient(config.ModelId);
+            var client = runtime.AsIChatClient(config.ModelId)
+                .AsBuilder()
+                .UseFunctionInvocation()
+                .Build();
 
             // Return the wrapper
             return new BedrockClientWrapper(runtime, client);

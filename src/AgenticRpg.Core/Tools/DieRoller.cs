@@ -3,7 +3,7 @@
 
 using System;
 
-namespace AgenticRpg.Cli
+namespace AgenticRpg.Core.Tools
 {
     public static class DieRoller
     {
