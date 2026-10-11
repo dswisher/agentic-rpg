@@ -10,21 +10,25 @@ using Microsoft.Extensions.AI;
 
 namespace AgenticRpg.Core.Agents
 {
-    public class GameSession : IGameSession
+    public sealed class GameSession : IGameSession
     {
         private readonly IChatClientWrapper wrapper;
+        private readonly IDieRoller dieRoller;
+
         private readonly List<ChatMessage> messages = new();
 
-        public GameSession(IChatClientWrapper wrapper)
+
+        public GameSession(IChatClientWrapper wrapper, IDieRoller dieRoller)
         {
             this.wrapper = wrapper;
+            this.dieRoller = dieRoller;
         }
 
 
         public async Task<ChatResponse> SendAsync(string input, CancellationToken cancellationToken = default)
         {
             var diceTool = AIFunctionFactory.Create(
-                (int sides) => DieRoller.RollDice(sides),
+                (int sides) => dieRoller.RollDice(sides),
                 name: "roll_dice",
                 description: "Roll one fair die. The sides value must be between 2 and 1000.");
 

@@ -20,8 +20,7 @@ namespace AgenticRpg.Cli
         public async Task RunAsync()
         {
             using var consoleCancellation = new ConsoleCancellation();
-
-            var gameSession = agent.CreateSession();
+            using var gameSession = agent.CreateSession();
 
             while (true)
             {

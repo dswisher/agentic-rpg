@@ -5,6 +5,6 @@ namespace AgenticRpg.Core.Agents
 {
     public interface IGameAgent
     {
-        IGameSession CreateSession();
+        IGameSessionHandle CreateSession();
     }
 }

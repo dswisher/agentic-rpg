@@ -11,6 +11,7 @@ using Amazon;
 using Amazon.BedrockRuntime;
 using Amazon.Runtime;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Logging;
 
 namespace AgenticRpg.Core.Clients
 {
@@ -26,7 +27,7 @@ namespace AgenticRpg.Core.Clients
         };
 
 
-        public static async Task<IChatClientWrapper> Create()
+        public static async Task<IChatClientWrapper> Create(ILoggerFactory loggerFactory)
         {
             // Read the config and pick it apart
             var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
@@ -64,6 +65,7 @@ namespace AgenticRpg.Core.Clients
             var runtime = new AmazonBedrockRuntimeClient(awsConfig);
             var client = runtime.AsIChatClient(config.ModelId)
                 .AsBuilder()
+                .UseLogging(loggerFactory)
                 .UseFunctionInvocation()
                 .Build();
 
