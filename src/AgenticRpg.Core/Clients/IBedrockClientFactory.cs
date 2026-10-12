@@ -7,6 +7,6 @@ namespace AgenticRpg.Core.Clients
 {
     public interface IBedrockClientFactory
     {
-        IChatClientWrapper Create(ConfigFileV1 config);
+        IChatClientWrapper Create(ModelConfig modelConfig, AuthEntry? authEntry);
     }
 }

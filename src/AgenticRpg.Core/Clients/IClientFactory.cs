@@ -5,6 +5,6 @@ namespace AgenticRpg.Core.Clients
 {
     public interface IClientFactory
     {
-        IChatClientWrapper Create();
+        IChatClientWrapper Create(string? modelName);
     }
 }

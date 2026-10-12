@@ -20,14 +20,15 @@ namespace AgenticRpg.Core.Clients
         }
 
 
-        public IChatClientWrapper Create(ConfigFileV1 config)
+        public IChatClientWrapper Create(ModelConfig modelConfig)
         {
+            var endpoint = modelConfig.Options?.Endpoint ?? "http://localhost:11434/v1/";
             var openAiClient = new ChatClient(
-                model: config.ModelId,
+                model: modelConfig.ModelId,
                 credential: new ApiKeyCredential("ollama"),
                 options: new OpenAIClientOptions
                 {
-                    Endpoint = new Uri("http://localhost:11434/v1/")
+                    Endpoint = new Uri(endpoint)
                 });
 
             var nakedClient = openAiClient.AsIChatClient();

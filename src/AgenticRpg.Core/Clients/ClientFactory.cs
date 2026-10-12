@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using AgenticRpg.Core.Models;
@@ -36,61 +37,65 @@ namespace AgenticRpg.Core.Clients
         }
 
 
-        public IChatClientWrapper Create()
+        public IChatClientWrapper Create(string? modelName)
         {
-            // Read the old config and pick it apart
+            // Read the config
+            var config = LoadConfig<ConfigFile>("config.jsonc", "config");
+
+            // Pick apart the config, and find the model config
+            modelName ??= config.DefaultModel;
+
+            var modelConfig = config.Models.SingleOrDefault(m => m.Name.Equals(modelName, StringComparison.Ordinal))
+                              ?? throw new InvalidOperationException($"Model '{modelName}' not found in config file.");
+
+            logger.LogInformation("Using model '{ModelName}' with ID '{ModelId}' from config file.", modelConfig.Name, modelConfig.ModelId);
+
+            // If the model needs authentication, read the auth config and find the matching auth config for this model
+            AuthEntry? authEntry = null;
+            if (!string.IsNullOrEmpty(modelConfig.AuthProfile))
+            {
+                var authConfig = LoadConfig<AuthConfig>("auth.jsonc", "auth config");
+
+                if (!authConfig.Profiles.TryGetValue(modelConfig.AuthProfile, out authEntry))
+                {
+                    throw new InvalidOperationException($"Auth profile '{modelConfig.AuthProfile}' not found in auth config file.");
+                }
+            }
+
+            // Build the proper client
+            return modelConfig.Provider switch
+            {
+                "bedrock" => bedrockFactory.Create(modelConfig, authEntry),
+                "ollama" => ollamaFactory.Create(modelConfig),
+                _ => throw new InvalidOperationException($"Unknown provider '{modelConfig.Provider}' for model '{modelConfig.Name}'."),
+            };
+        }
+
+
+        private T LoadConfig<T>(string filename, string kind)
+        {
             var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            var oldConfigFilePath = Path.Join(userProfile, ".config", "agentic-rpg", "old-config.jsonc");
+            var configFilePath = Path.Join(userProfile, ".config", "agentic-rpg", filename);
 
-            if (!File.Exists(oldConfigFilePath))
+            if (!File.Exists(configFilePath))
             {
-                throw new FileNotFoundException($"Old Config file not found: {oldConfigFilePath}");
+                throw new FileNotFoundException($"{kind} file not found: {configFilePath}");
             }
 
-            logger.LogInformation("...reading old config file {ConfigFilePath}", oldConfigFilePath);
+            logger.LogInformation("...reading {Kind} file {ConfigFilePath}", kind, configFilePath);
 
-            ConfigFileV1? oldConfig;
-            using (var stream = File.OpenRead(oldConfigFilePath))
-            {
-                oldConfig = JsonSerializer.Deserialize<ConfigFileV1>(stream, serializerOptions);
-            }
-
-            if (oldConfig == null)
-            {
-                throw new InvalidOperationException("Failed to deserialize old configuration file.");
-            }
-
-            // Read the new config and pick it apart
-            var configFilePath = Path.Join(userProfile, ".config", "agentic-rpg", "config.jsonc");
-
-            if (!File.Exists(oldConfigFilePath))
-            {
-                throw new FileNotFoundException($"Config file not found: {oldConfigFilePath}");
-            }
-
-            logger.LogInformation("...reading config file {ConfigFilePath}", oldConfigFilePath);
-
-            ConfigFileV2? config;
+            T? config;
             using (var stream = File.OpenRead(configFilePath))
             {
-                config = JsonSerializer.Deserialize<ConfigFileV2>(stream, serializerOptions);
+                config = JsonSerializer.Deserialize<T>(stream, serializerOptions);
             }
 
             if (config == null)
             {
-                throw new InvalidOperationException("Failed to deserialize configuration file.");
+                throw new InvalidOperationException($"Failed to deserialize {kind} file.");
             }
 
-            // Read the auth file (which is optional)
-            // TODO
-
-            // TODO - an awful hack to test out ollama - use the new V2 config to figure this out!
-            if (oldConfig.ModelId.StartsWith("qwen", StringComparison.OrdinalIgnoreCase))
-            {
-                return ollamaFactory.Create(oldConfig);
-            }
-
-            return bedrockFactory.Create(oldConfig);
+            return config;
         }
     }
 }

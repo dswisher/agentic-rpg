@@ -1,6 +1,7 @@
 // Copyright (c) Doug Swisher. All Rights Reserved.
 // Licensed under the MIT License. See LICENSE.md in the project root for license information.
 
+using System;
 using AgenticRpg.Core.Models;
 using Amazon;
 using Amazon.BedrockRuntime;
@@ -23,21 +24,26 @@ namespace AgenticRpg.Core.Clients
         }
 
 
-        public IChatClientWrapper Create(ConfigFileV1 config)
+        public IChatClientWrapper Create(ModelConfig modelConfig, AuthEntry? authEntry)
         {
-            var region = RegionEndpoint.GetBySystemName(config.RegionName);
+            if (authEntry == null || string.IsNullOrWhiteSpace(authEntry.BearerToken))
+            {
+                throw new InvalidOperationException($"Auth entry with a bearerToken is required for model '{modelConfig.Name}'.");
+            }
+
+            var region = RegionEndpoint.GetBySystemName(modelConfig.Options?.Region ?? "us-east-1");
 
             // Set up the AWS config
             var awsConfig = new AmazonBedrockRuntimeConfig
             {
                 RegionEndpoint = region,
-                AWSTokenProvider = new StaticTokenProvider(config.BearerToken),
+                AWSTokenProvider = new StaticTokenProvider(authEntry.BearerToken),
                 AuthSchemePreference = ["httpBearerAuth"], // otherwise SigV4 wins if AWS creds exist
             };
 
-            logger.LogInformation("...creating bedrock IChatClient, model {ModelId}...", config.ModelId);
+            logger.LogInformation("...creating bedrock IChatClient, model {ModelId}...", modelConfig.ModelId);
             var runtime = new AmazonBedrockRuntimeClient(awsConfig);
-            var nakedClient = runtime.AsIChatClient(config.ModelId);
+            var nakedClient = runtime.AsIChatClient(modelConfig.ModelId);
             var client = enhancer.Enhance(nakedClient);
 
             // Return the wrapper

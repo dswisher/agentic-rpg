@@ -7,6 +7,6 @@ namespace AgenticRpg.Core.Clients
 {
     public interface IOllamaClientFactory
     {
-        IChatClientWrapper Create(ConfigFileV1 config);
+        IChatClientWrapper Create(ModelConfig modelConfig);
     }
 }

@@ -10,7 +10,7 @@ namespace AgenticRpg.Cli
 {
     public static class Container
     {
-        public static ServiceProvider CreateContainer()
+        public static ServiceProvider CreateContainer(string? modelName)
         {
             // Create the collection that we'll populate with goodies
             var services = new ServiceCollection();
@@ -31,7 +31,7 @@ namespace AgenticRpg.Cli
             });
 
             // Populate it
-            services.AddCoreServices();
+            services.AddCoreServices(modelName);
 
             services.AddSingleton<GameApp>();
 

@@ -51,7 +51,9 @@ namespace AgenticRpg.Cli
                 {
                     var response = await gameSession.SendAsync(input, cancellationToken);
 
+                    Console.WriteLine();
                     Console.WriteLine(response.Text);
+                    Console.WriteLine();
 
                     if (response.Usage is { } usage)
                     {

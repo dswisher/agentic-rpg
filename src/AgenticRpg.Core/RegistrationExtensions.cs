@@ -10,7 +10,7 @@ namespace AgenticRpg.Core
 {
     public static class RegistrationExtensions
     {
-        public static void AddCoreServices(this IServiceCollection services)
+        public static void AddCoreServices(this IServiceCollection services, string? modelName)
         {
             services.AddSingleton<IBedrockClientFactory, BedrockClientFactory>();
             services.AddSingleton<IChatClientEnhancer, ChatClientEnhancer>();
@@ -19,7 +19,7 @@ namespace AgenticRpg.Core
             services.AddSingleton<IGameAgent, GameAgent>();
             services.AddSingleton<IOllamaClientFactory, OllamaClientFactory>();
 
-            services.AddSingleton<IChatClientWrapper>(sp => sp.GetRequiredService<IClientFactory>().Create());
+            services.AddSingleton<IChatClientWrapper>(sp => sp.GetRequiredService<IClientFactory>().Create(modelName));
 
             // Session-specific bits are scoped
             services.AddScoped<IGameSession, GameSession>();
