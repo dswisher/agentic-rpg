@@ -36,6 +36,7 @@ namespace AgenticRpg.Core.Agents
             {
                 Instructions = """
                                Only respond with plain text (no markdown), lines should not be longer than 80 characters.
+                               For any request involving a random outcome or dice roll, call roll_dice before answering. Never invent or claim a result without using the tool. Describe the result returned by the tool.
                                """,
                 Tools = [diceTool]
             };

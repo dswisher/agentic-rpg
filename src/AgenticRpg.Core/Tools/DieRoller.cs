@@ -25,9 +25,11 @@ namespace AgenticRpg.Core.Tools
                     "The number of sides must be between 2 and 1000.");
             }
 
-            logger.LogInformation("[rolling a d{Sides}]", sides);
+            var result = Random.Shared.Next(1, sides + 1);
 
-            return Random.Shared.Next(1, sides + 1);
+            logger.LogInformation("...rolled a {Die} and got {Pips}...", $"d{sides}", result);
+
+            return result;
         }
     }
 }

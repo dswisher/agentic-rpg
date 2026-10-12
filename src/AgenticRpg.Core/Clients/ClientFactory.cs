@@ -6,10 +6,6 @@ using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using AgenticRpg.Core.Models;
-using Amazon;
-using Amazon.BedrockRuntime;
-using Amazon.Runtime;
-using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
 
 namespace AgenticRpg.Core.Clients
@@ -25,33 +21,59 @@ namespace AgenticRpg.Core.Clients
             RespectNullableAnnotations = true
         };
 
-        private readonly ILoggerFactory loggerFactory;
+        private readonly IBedrockClientFactory bedrockFactory;
+        private readonly IOllamaClientFactory ollamaFactory;
         private readonly ILogger<ClientFactory> logger;
 
-        public ClientFactory(ILoggerFactory loggerFactory, ILogger<ClientFactory> logger)
+        public ClientFactory(
+            IBedrockClientFactory bedrockFactory,
+            IOllamaClientFactory ollamaFactory,
+            ILogger<ClientFactory> logger)
         {
-            this.loggerFactory = loggerFactory;
+            this.bedrockFactory = bedrockFactory;
+            this.ollamaFactory = ollamaFactory;
             this.logger = logger;
         }
 
 
         public IChatClientWrapper Create()
         {
-            // Read the config and pick it apart
+            // Read the old config and pick it apart
             var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            var configFilePath = Path.Join(userProfile, ".config", "agentic-rpg", "config.jsonc");
+            var oldConfigFilePath = Path.Join(userProfile, ".config", "agentic-rpg", "old-config.jsonc");
 
-            if (!File.Exists(configFilePath))
+            if (!File.Exists(oldConfigFilePath))
             {
-                throw new FileNotFoundException($"Config file not found: {configFilePath}");
+                throw new FileNotFoundException($"Old Config file not found: {oldConfigFilePath}");
             }
 
-            logger.LogInformation("...reading config file {ConfigFilePath}", configFilePath);
+            logger.LogInformation("...reading old config file {ConfigFilePath}", oldConfigFilePath);
 
-            ConfigFile? config;
+            ConfigFileV1? oldConfig;
+            using (var stream = File.OpenRead(oldConfigFilePath))
+            {
+                oldConfig = JsonSerializer.Deserialize<ConfigFileV1>(stream, serializerOptions);
+            }
+
+            if (oldConfig == null)
+            {
+                throw new InvalidOperationException("Failed to deserialize old configuration file.");
+            }
+
+            // Read the new config and pick it apart
+            var configFilePath = Path.Join(userProfile, ".config", "agentic-rpg", "config.jsonc");
+
+            if (!File.Exists(oldConfigFilePath))
+            {
+                throw new FileNotFoundException($"Config file not found: {oldConfigFilePath}");
+            }
+
+            logger.LogInformation("...reading config file {ConfigFilePath}", oldConfigFilePath);
+
+            ConfigFileV2? config;
             using (var stream = File.OpenRead(configFilePath))
             {
-                config = JsonSerializer.Deserialize<ConfigFile>(stream, serializerOptions);
+                config = JsonSerializer.Deserialize<ConfigFileV2>(stream, serializerOptions);
             }
 
             if (config == null)
@@ -59,26 +81,16 @@ namespace AgenticRpg.Core.Clients
                 throw new InvalidOperationException("Failed to deserialize configuration file.");
             }
 
-            var region = RegionEndpoint.GetBySystemName(config.RegionName);
+            // Read the auth file (which is optional)
+            // TODO
 
-            // Set up the AWS config
-            var awsConfig = new AmazonBedrockRuntimeConfig
+            // TODO - an awful hack to test out ollama - use the new V2 config to figure this out!
+            if (oldConfig.ModelId.StartsWith("qwen", StringComparison.OrdinalIgnoreCase))
             {
-                RegionEndpoint = region,
-                AWSTokenProvider = new StaticTokenProvider(config.BearerToken),
-                AuthSchemePreference = ["httpBearerAuth"], // otherwise SigV4 wins if AWS creds exist
-            };
+                return ollamaFactory.Create(oldConfig);
+            }
 
-            logger.LogInformation("...creating bedrock IChatClient, model {ModelId}...", config.ModelId);
-            var runtime = new AmazonBedrockRuntimeClient(awsConfig);
-            var client = runtime.AsIChatClient(config.ModelId)
-                .AsBuilder()
-                .UseLogging(loggerFactory)
-                .UseFunctionInvocation()
-                .Build();
-
-            // Return the wrapper
-            return new BedrockClientWrapper(runtime, client);
+            return bedrockFactory.Create(oldConfig);
         }
     }
 }

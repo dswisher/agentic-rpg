@@ -12,9 +12,12 @@ namespace AgenticRpg.Core
     {
         public static void AddCoreServices(this IServiceCollection services)
         {
+            services.AddSingleton<IBedrockClientFactory, BedrockClientFactory>();
+            services.AddSingleton<IChatClientEnhancer, ChatClientEnhancer>();
             services.AddSingleton<IClientFactory, ClientFactory>();
             services.AddSingleton<IDieRoller, DieRoller>();
             services.AddSingleton<IGameAgent, GameAgent>();
+            services.AddSingleton<IOllamaClientFactory, OllamaClientFactory>();
 
             services.AddSingleton<IChatClientWrapper>(sp => sp.GetRequiredService<IClientFactory>().Create());
 
