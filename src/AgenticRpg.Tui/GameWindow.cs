@@ -118,12 +118,6 @@ namespace AgenticRpg.Tui
 
         public void AddPlayerMessage(string text)
         {
-            var message = text.Trim();
-            if (message.Length == 0)
-            {
-                return;
-            }
-
             FrameView entry = new()
             {
                 Title = "You",
@@ -138,7 +132,7 @@ namespace AgenticRpg.Tui
 
             entry.Add(new Label
             {
-                Text = message,
+                Text = text,
                 X = 0,
                 Y = 0,
                 Width = Dim.Fill(),

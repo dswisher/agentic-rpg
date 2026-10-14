@@ -1,29 +1,52 @@
 ﻿// Copyright (c) Doug Swisher. All Rights Reserved.
 // Licensed under the MIT License. See LICENSE.md in the project root for license information.
 
-using Terminal.Gui.App;
+using System;
+using System.CommandLine;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace AgenticRpg.Tui
 {
     public static class Program
     {
-        public static void Main()
+        public static int Main(string[] args)
         {
-            using (var app = Application.Create())
+            var modelOption = new Option<string?>("--model", "-m")
             {
-                app.Init();
+                Description = "Name of the chat model to use.",
+            };
 
-                using (var window = new GameWindow(app))
+            var root = new RootCommand("Agentic RPG") { modelOption };
+
+            root.SetAction(parseResult =>
+            {
+                var model = parseResult.GetValue(modelOption);
+                return RunGame(model);
+            });
+
+            return root.Parse(args).Invoke();
+        }
+
+
+        private static int RunGame(string? modelName)
+        {
+            try
+            {
+                using (var container = Container.CreateContainer(modelName))
                 {
-                    window.MessageSubmitted += (_, text) =>
-                    {
-                        // ReSharper disable twice AccessToDisposedClosure -- only raised during app.Run
-                        window.AddPlayerMessage(text);
-                        window.AddGmMessage("The **stone door** remains shut.\n\nWhat do you do next?");
-                    };
+                    var gameApp = container.GetRequiredService<GameApp>();
 
-                    app.Run(window);
+                    gameApp.Run();
+
+                    return 0;
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Unhandled exception");
+                Console.WriteLine(ex);
+
+                return 1;
             }
         }
     }
