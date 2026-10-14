@@ -49,7 +49,7 @@ namespace AgenticRpg.Core.Agents
                            wrapper.Chat.GetStreamingResponseAsync(
                                [.. messages, userMessage],
                                chatOptions,
-                               cancellationToken))
+                               cancellationToken).ConfigureAwait(false))
             {
                 updates.Add(update);
             }

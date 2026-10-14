@@ -199,6 +199,16 @@ dotnet_diagnostic.CA1873.severity = none
 # CA1305: IFormatProvider not specified — current culture intentional for display.
 dotnet_diagnostic.CA1305.severity = none
 
+
+# -------------------------------------------------------------------------
+# Core library - strive to follow class library conventions
+# -------------------------------------------------------------------------
+
+# Consistently use ConfigureAwait(false)
+[src/AgenticRpg.Core/**.cs]
+dotnet_diagnostic.CA2007.severity = warning
+
+
 # -------------------------------------------------------------------------
 # Test projects — relax some rules that are noisy in tests
 # -------------------------------------------------------------------------
