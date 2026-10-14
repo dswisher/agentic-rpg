@@ -2,19 +2,29 @@
 // Licensed under the MIT License. See LICENSE.md in the project root for license information.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Threading;
+using System.Threading.Tasks;
 using AgenticRpg.Core.Agents;
 using Microsoft.Extensions.Logging;
 using Terminal.Gui.App;
 
 namespace AgenticRpg.Tui
 {
+    [SuppressMessage("Design", "CA1001:Types that own disposable fields should be disposable", Justification = "The disposable fields are disposed in Run()")]
     public sealed class GameApp
     {
         private readonly IGameAgent agent;
         private readonly ILogger<GameApp> logger;
 
-        private GameWindow? window; // per-run state
+        // Per-run state
+        private GameWindow? window;
         private IGameSessionHandle? session;
+        private IApplication? app;
+        private CancellationTokenSource? turnCts;
+        private bool turnActive;
+        private bool quitPending;
+
 
         public GameApp(
             IGameAgent agent,
@@ -32,23 +42,37 @@ namespace AgenticRpg.Tui
                 using var gameSession = agent.CreateSession();
                 session = gameSession;
 
-                using var app = Application.Create();
-                app.Init();
+                using var theApp = Application.Create();
+                app = theApp;
+                theApp.Init();
 
-                using var gameWindow = new GameWindow(app);
+                using var gameWindow = new GameWindow(theApp);
                 window = gameWindow;
                 gameWindow.MessageSubmitted += OnMessageSubmitted;
+                gameWindow.IsRunningChanging += OnWindowRunningChanging;
 
                 logger.LogInformation("Starting game app...");
 
                 try
                 {
-                    app.Run(gameWindow);
+                    theApp.Run(gameWindow);
+
+                    if (turnActive)
+                    {
+                        logger.LogWarning("Game app stopped while turn was active...");
+                    }
                 }
                 finally
                 {
                     window = null;
                     session = null;
+                    app = null;
+
+                    turnActive = false;
+                    quitPending = false;
+
+                    turnCts?.Dispose();
+                    turnCts = null;
                 }
 
                 logger.LogInformation("Game app finished.");
@@ -63,11 +87,65 @@ namespace AgenticRpg.Tui
 
         private void OnMessageSubmitted(object? sender, string text)
         {
-            if (window != null)
+            if (window != null && !turnActive)
             {
                 window.AddPlayerMessage(text);
-                window.AddGmMessage("The **stone door** remains shut.\n\nWhat do you do next?");
+                window.SetBusy(true);
+                turnActive = true;
+
+                turnCts?.Dispose();
+                turnCts = new CancellationTokenSource();
+
+                // Not awaited: runs synchronously until its first await, then resumes on the UI
+                // thread via MainLoopSyncContext. It never faults (catches everything), and
+                // turnActive tracks completion.
+                _ = RunTurnAsync(text, turnCts.Token);
             }
+        }
+
+
+        private async Task RunTurnAsync(string input, CancellationToken ct)
+        {
+            try
+            {
+                await Task.Delay(2000, ct);
+                window!.AddGmMessage($"The **stone door** remains shut.\n\nYou wrote: {input}");
+            }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
+            {
+                window!.AddSystemMessage("[cancelled]");
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Turn failed.");
+                window!.AddSystemMessage($"[error: {ex.Message}]");
+            }
+            finally
+            {
+                window?.SetBusy(false);
+                turnActive = false;
+                if (quitPending)
+                {
+                    app?.RequestStop(window);
+                }
+            }
+        }
+
+
+        private void OnWindowRunningChanging(object? sender, CancelEventArgs<bool> e)
+        {
+            if (e.NewValue || !turnActive)
+            {
+                return;  // starting, or idle: let it stop
+            }
+
+            e.Cancel = true;                        // not yet...
+            quitPending = true;
+            window!.AddSystemMessage("[quitting…]");
+
+            // Not Cancel(): it would run the turn's continuation inline, and its RequestStop
+            // would be lost when this vetoed stop resets StopRequested.
+            _ = turnCts!.CancelAsync();             // ...the turn's finally will RequestStop
         }
     }
 }

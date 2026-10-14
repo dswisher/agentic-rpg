@@ -15,8 +15,10 @@ namespace AgenticRpg.Tui
         private readonly IApplication app;
         private readonly TextField inputField;
         private readonly FrameView chatPane;
+        private readonly FrameView inputPane;
 
         private View? lastEntry;
+        private bool busy;
 
 
         public GameWindow(IApplication app)
@@ -30,7 +32,7 @@ namespace AgenticRpg.Tui
             Width = Dim.Fill();
             Height = Dim.Fill();
 
-            (var inputPane, inputField) = BuildInputPane();
+            (inputPane, inputField) = BuildInputPane();
             var statusPane = BuildStatusPane(inputPane);
             chatPane = BuildChatPane(statusPane, inputPane);
 
@@ -48,7 +50,7 @@ namespace AgenticRpg.Tui
         private (FrameView, TextField) BuildInputPane()
         {
             // The frame where the user can enter text, at the bottom of the window
-            FrameView inputPane = new()
+            FrameView inPane = new()
             {
                 Title = "Input",
                 X = 0,
@@ -69,9 +71,9 @@ namespace AgenticRpg.Tui
             inField.Accepted += OnInputAccepted;
             inField.KeyDown += OnInputKeyDown;
 
-            inputPane.Add(inField);
+            inPane.Add(inField);
 
-            return (inputPane, inField);
+            return (inPane, inField);
         }
 
 
@@ -145,7 +147,7 @@ namespace AgenticRpg.Tui
 
         public void AddGmMessage(string text)
         {
-            FrameView gmEntry = new()
+            FrameView entry = new()
             {
                 Title = "GM",
                 X = 1,
@@ -153,7 +155,7 @@ namespace AgenticRpg.Tui
                 Height = 5
             };
 
-            gmEntry.Add(new Markdown
+            entry.Add(new Markdown
             {
                 Text = text,
                 X = 0,
@@ -162,7 +164,30 @@ namespace AgenticRpg.Tui
                 Height = Dim.Fill()
             });
 
-            AddEntry(gmEntry);
+            AddEntry(entry);
+        }
+
+
+        public void AddSystemMessage(string text)
+        {
+            FrameView entry = new()
+            {
+                Title = "System",
+                X = 1,
+                Width = Dim.Fill(),
+                Height = 3
+            };
+
+            entry.Add(new Label
+            {
+                Text = text,
+                X = 0,
+                Y = 0,
+                Width = Dim.Fill(),
+                Height = Dim.Fill()
+            });
+
+            AddEntry(entry);
         }
 
 
@@ -184,13 +209,23 @@ namespace AgenticRpg.Tui
         }
 
 
-        // TODO - later steps:
-        // public void SetBusy(bool busy);
-        // public void AddSystemMessage(string text); // [canceled], errors
+        public void SetBusy(bool newVal)
+        {
+            // Set the flag
+            busy = newVal;
+
+            // Show something to the user
+            inputPane.Title = busy ? "Input (busy)" : "Input";
+        }
 
 
         private void OnInputAccepted(object? sender, EventArgs e)
         {
+            if (busy)
+            {
+                return;
+            }
+
             var message = inputField.Text.Trim();
             inputField.Text = string.Empty;
 

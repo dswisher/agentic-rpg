@@ -34,21 +34,21 @@ Each sub-step should leave the TUI working and be committed on its own.
 
 No behavior change; separate commit.
 
-- [ ] In `.editorconfig`, add a section that applies only to Core, with a
+- [x] In `.editorconfig`, add a section that applies only to Core, with a
       comment explaining why the TUI is excluded:
       ```ini
       [src/AgenticRpg.Core/**.cs]
       dotnet_diagnostic.CA2007.severity = warning
       ```
-- [ ] Fix what it reports. Currently that's `GameSession`'s `await foreach`:
+- [x] Fix what it reports. Currently that's `GameSession`'s `await foreach`:
       add `.ConfigureAwait(false)` to `GetStreamingResponseAsync(...)`.
-- [ ] Do **not** enable CA2007 for `src/AgenticRpg.Tui`.
+- [x] Do **not** enable CA2007 for `src/AgenticRpg.Tui`.
 
 Checks:
 
-- [ ] Build has no warnings.
-- [ ] Temporarily remove the `ConfigureAwait` and confirm CA2007 fires.
-- [ ] CLI and TUI behave exactly as before.
+- [x] Build has no warnings.
+- [x] Temporarily remove the `ConfigureAwait` and confirm CA2007 fires.
+- [x] CLI and TUI behave exactly as before.
 
 ## 3b: async turn with a fake delay, busy and error states, deferred quit
 
@@ -56,25 +56,25 @@ No model calls yet: `await Task.Delay(2000, ct)` and a canned reply.
 
 ### `GameWindow`
 
-- [ ] `SetBusy(bool busy)`: a `busy` flag that makes `OnInputAccepted` ignore
+- [x] `SetBusy(bool busy)`: a `busy` flag that makes `OnInputAccepted` ignore
       Enter, plus a visible indicator (for example, change the input pane's
       title to "Input — GM is thinking…"; keep `inputPane` in a field).
       **Keep the `TextField` enabled**, so it keeps focus and still receives
       keys (needed for the cancel key in 3d).
-- [ ] `AddSystemMessage(string text)`: a third kind of entry, for
+- [x] `AddSystemMessage(string text)`: a third kind of entry, for
       `[cancelled]`, `[quitting…]`, and errors (for example, a plain `Label`
       with no frame), built on `AddEntry`.
-- [ ] Remove the "later steps" TODO comment.
+- [x] Remove the "later steps" TODO comment.
 
 ### `GameApp`
 
-- [ ] Per-run fields: `app`, `window`, `session`, `turnCts`, `turnActive`,
+- [x] Per-run fields: `app`, `window`, `session`, `turnCts`, `turnActive`,
       `quitPending`. Set and clear them like the existing ones.
-- [ ] `OnMessageSubmitted`: ignore if `turnActive`; otherwise add the player
+- [x] `OnMessageSubmitted`: ignore if `turnActive`; otherwise add the player
       message, `SetBusy(true)`, set `turnActive`, dispose the old `turnCts` and
       create a new one, and start `RunTurnAsync` without awaiting it
       (`_ = RunTurnAsync(text, ct);`).
-- [ ] `RunTurnAsync`: no `ConfigureAwait(false)`. Catch everything so the task
+- [x] `RunTurnAsync`: no `ConfigureAwait(false)`. Catch everything so the task
       never faults.
 
 ```csharp
@@ -96,16 +96,16 @@ private async Task RunTurnAsync(string input, CancellationToken ct)
     }
     finally
     {
-        window!.SetBusy(false);
+        window?.SetBusy(false);
         turnActive = false;                 // before RequestStop: see below
-        if (quitPending) app!.RequestStop(window);
+        if (quitPending) app?.RequestStop(window);
     }
 }
 ```
 
 ### Deferred quit
 
-- [ ] Subscribe to the window's `IsRunningChanging` event:
+- [x] Subscribe to the window's `IsRunningChanging` event:
 
 ```csharp
 gameWindow.IsRunningChanging += OnWindowRunningChanging;
@@ -117,36 +117,60 @@ private void OnWindowRunningChanging(object? sender, CancelEventArgs<bool> e)
     e.Cancel = true;                        // not yet...
     quitPending = true;
     window!.AddSystemMessage("[quitting…]");
-    turnCts!.Cancel();                      // ...the turn's finally will RequestStop
+    _ = turnCts!.CancelAsync();             // ...the turn's finally will RequestStop
 }
 ```
 
-- [ ] Order matters: `turnActive = false` before `RequestStop`, because
-      `RequestStop` raises `IsRunningChanging` again and it must be allowed
-      through this time.
-- [ ] After `app.Run` returns: log a warning if `turnActive` is still true (a
+- [x] Order matters: `turnActive = false` before `RequestStop`. `RequestStop`
+      only sets `StopRequested`; the loop then exits and `End` raises
+      `IsRunningChanging` again, which must be allowed through this time.
+- [x] Use `CancelAsync()`, not `Cancel()`, in the veto handler. `Cancel()` runs
+      the token's callbacks synchronously, so `Task.Delay` completes inside the
+      handler. Its `await` continuation captured `MainLoopSyncContext`, which
+      is still current, so .NET runs it inline instead of posting it. The
+      turn's `finally` then calls `RequestStop` *before* the handler returns,
+      and `Run` resets `StopRequested = false` after the vetoed `End`, so the
+      quit is lost (symptom: `[quitting…]` and `[cancelled]` appear, but the
+      app keeps running). `CancelAsync()` runs the callbacks on the thread
+      pool, so the continuation is posted and runs on a later loop iteration,
+      after the reset. A plain `Cancel()` is fine anywhere a stop isn't being
+      vetoed (for example, the 3d cancel key).
+- [x] After `app.Run` returns: log a warning if `turnActive` is still true (a
       bug), then dispose `turnCts`. Do not wait on anything.
 
 ### To verify in the IDE
 
-- [ ] The exact event args type of `IsRunningChanging` (the docs describe
+- [x] The exact event args type of `IsRunningChanging` (the docs describe
       `CancelEventArgs<bool>` with `NewValue` and `Cancel`).
-- [ ] That the quit key actually goes through `IsRunningChanging`. It is
+      Confirmed: `EventHandler<CancelEventArgs<bool>>` (`IRunnable.cs`).
+- [x] That the quit key actually goes through `IsRunningChanging`. It is
       documented as raised by both `RequestStop` and `End`.
-- [ ] What the quit key is (I believe Esc is the v2 default).
+      Confirmed, with a correction: `RequestStop` only sets `StopRequested`.
+      `RunLoop` exits, `Run`'s `finally` calls `End`, and `End` raises
+      `IsRunningChanging`. If a handler cancels, `End` returns early, and
+      `Run` resets `StopRequested = false` and re-enters `RunLoop`
+      (`ApplicationImpl.Run.cs`).
+- [x] What the quit key is (I believe Esc is the v2 default).
+      Confirmed: `[Command.Quit] = Bind.All (Key.Esc)` (`Application.cs`).
+      Ctrl+C is not quit: the terminal is in raw mode, so it arrives as a key,
+      and `TextField` binds it to Copy.
 
 ### Checks
 
-- [ ] The busy indicator appears and clears.
-- [ ] Enter does nothing while busy; typing still works.
-- [ ] Quitting mid-delay shows `[quitting…]` and then exits; nothing alarming
+- [x] The busy indicator appears and clears.
+- [x] Enter does nothing while busy; typing still works.
+- [x] Quitting mid-delay shows `[quitting…]` and then exits; nothing alarming
       in `tui.log`.
-- [ ] Quitting while idle exits immediately.
-- [ ] A temporary `throw` inside the turn shows the error path, and input
+- [x] Quitting while idle exits immediately.
+- [x] A temporary `throw` inside the turn shows the error path, and input
       works again afterwards.
-- [ ] Optional: a breakpoint after the `await` in `RunTurnAsync` shows the main
+- [x] Optional: a breakpoint after the `await` in `RunTurnAsync` shows the main
       thread, with `TimedEvents.RunTimersImpl` → `Invoke` lambda → `MoveNext`
       on the call stack.
+      That holds for a normal turn and for a quit using `CancelAsync()`. With
+      a plain `Cancel()` in the veto handler, the stack instead shows
+      `OnWindowRunningChanging` → `CancellationTokenSource.Cancel` → … →
+      `MoveNext`: the continuation ran inline.
 
 ## 3c: the real model
 
