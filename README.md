@@ -74,3 +74,7 @@ To use a model, you must first pull it, with something like
 ollama pull qwen3.5:9b
 ```
 
+## Links
+
+- [Terminal.Gui](https://github.com/tui-cs/Terminal.Gui)
+
