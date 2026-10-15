@@ -198,21 +198,21 @@ Checks:
 
 ## 3d: a key for cancelling
 
-- [ ] `GameWindow` adds a `CancelRequested` event. In `OnInputKeyDown`, when
+- [x] `GameWindow` adds a `CancelRequested` event. In `OnInputKeyDown`, when
       `busy` is set and the cancel key is pressed, raise it and set
       `Handled = true`. When idle, leave the key unhandled.
-- [ ] `GameApp` handles it with `turnCts?.Cancel()`; the existing
+- [x] `GameApp` handles it with `turnCts?.Cancel()`; the existing
       `[cancelled]` path does the rest.
-- [ ] If the cancel key is also the quit key (Esc), this mirrors the CLI's
+- [x] If the cancel key is also the quit key (Esc), this mirrors the CLI's
       Ctrl+C: cancel while busy, quit while idle. Verify that handling the key
       in the view stops the app-level quit binding.
 
 Checks:
 
-- [ ] Cancel mid-reply, then send another message. The conversation should be
+- [x] Cancel mid-reply, then send another message. The conversation should be
       consistent, because `GameSession` only records a turn in history when it
       succeeds.
-- [ ] Quitting while busy still works (deferred quit and cancel share the same
+- [x] Quitting while busy still works (deferred quit and cancel share the same
       path).
 
 ## After step 3

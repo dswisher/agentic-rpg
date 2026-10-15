@@ -45,6 +45,7 @@ namespace AgenticRpg.Tui
 
 
         public event EventHandler<string>? MessageSubmitted;
+        public event EventHandler? CancelRequested;
 
 
         private (FrameView, TextField) BuildInputPane()
@@ -267,6 +268,14 @@ namespace AgenticRpg.Tui
             {
                 chatPane.ScrollVertical(chatPane.Viewport.Height);
                 key.Handled = true;
+            }
+            else if (key == Key.Esc)
+            {
+                if (busy)
+                {
+                    CancelRequested?.Invoke(this, EventArgs.Empty);
+                    key.Handled = true;
+                }
             }
         }
 

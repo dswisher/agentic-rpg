@@ -49,6 +49,7 @@ namespace AgenticRpg.Tui
                 using var gameWindow = new GameWindow(theApp);
                 window = gameWindow;
                 gameWindow.MessageSubmitted += OnMessageSubmitted;
+                gameWindow.CancelRequested += OnCancelRequested;
                 gameWindow.IsRunningChanging += OnWindowRunningChanging;
 
                 logger.LogInformation("Starting game app...");
@@ -82,6 +83,12 @@ namespace AgenticRpg.Tui
                 logger.LogError(ex, "Unhandled exception in game app.");
                 throw;
             }
+        }
+
+
+        private void OnCancelRequested(object? sender, EventArgs e)
+        {
+            turnCts?.Cancel();
         }
 
 
