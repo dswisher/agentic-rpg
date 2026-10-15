@@ -74,7 +74,23 @@ To use a model, you must first pull it, with something like
 ollama pull qwen3.5:9b
 ```
 
+## Project Board
+
+Implementation stories are tracked as Markdown cards in `project-board/`, using
+the [`markban`](https://github.com/dswisher/markban) tool. Card colors are
+visual category hints and may become more meaningful as the project grows:
+
+- `green` — hand-crafted world
+- `blue` — local command loop
+- `purple` — event recording and action history
+- `red` — NPC conversations
+- `yellow` — LLM command integration
+- `magenta` — NPC world simulation
+- `cyan` — generated world content
+
+Epic types and dependencies describe workflow and prerequisites; colors are not
+used for ordering or dependency behavior.
+
 ## Links
 
 - [Terminal.Gui](https://github.com/tui-cs/Terminal.Gui)
-
