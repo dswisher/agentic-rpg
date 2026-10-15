@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using AgenticRpg.Core.Models;
+using AgenticRpg.Core.Models.Config;
 using Microsoft.Extensions.Logging;
 
 namespace AgenticRpg.Core.Clients

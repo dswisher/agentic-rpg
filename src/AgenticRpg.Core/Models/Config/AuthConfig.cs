@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
-namespace AgenticRpg.Core.Models
+namespace AgenticRpg.Core.Models.Config
 {
     [SuppressMessage("ReSharper", "CollectionNeverUpdated.Global", Justification = "Deserialized from config file")]
     [SuppressMessage("ReSharper", "ClassNeverInstantiated.Global", Justification = "Deserialized from config file")]

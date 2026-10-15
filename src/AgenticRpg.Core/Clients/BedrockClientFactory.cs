@@ -3,6 +3,7 @@
 
 using System;
 using AgenticRpg.Core.Models;
+using AgenticRpg.Core.Models.Config;
 using Amazon;
 using Amazon.BedrockRuntime;
 using Amazon.Runtime;

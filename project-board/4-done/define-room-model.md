@@ -16,11 +16,11 @@ especially **Core architecture** and **First milestones**.
 
 ## Acceptance Criteria
 
-- [ ] A room has a stable identifier.
-- [ ] A room has a player-facing description.
-- [ ] A room can define named exits that point to other rooms.
-- [ ] The model does not require persistence or LLM-generated content.
-- [ ] The model is sufficient to represent the initial three-room world.
+- [x] A room has a stable identifier.
+- [x] A room has a player-facing description.
+- [x] A room can define named exits that point to other rooms.
+- [x] The model does not require persistence or LLM-generated content.
+- [x] The model is sufficient to represent the initial three-room world.
 
 ## Out of Scope
 

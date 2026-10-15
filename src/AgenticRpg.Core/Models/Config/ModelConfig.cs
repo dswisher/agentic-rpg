@@ -3,12 +3,17 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-namespace AgenticRpg.Core.Models
+namespace AgenticRpg.Core.Models.Config
 {
     [SuppressMessage("ReSharper", "ClassNeverInstantiated.Global", Justification = "Deserialized from config file")]
     [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global", Justification = "Deserialized from config file")]
-    public class AuthEntry
+    public class ModelConfig
     {
-        public string? BearerToken { get; init; }
+        public required string Name { get; init; }
+        public required string Provider { get; init; }
+        public required string ModelId { get; init; }
+
+        public ModelOptions? Options { get; init; }
+        public string? AuthProfile { get; init; }
     }
 }

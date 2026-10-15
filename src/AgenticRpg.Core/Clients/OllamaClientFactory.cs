@@ -4,6 +4,7 @@
 using System;
 using System.ClientModel;
 using AgenticRpg.Core.Models;
+using AgenticRpg.Core.Models.Config;
 using Microsoft.Extensions.AI;
 using OpenAI;
 using OpenAI.Chat;
