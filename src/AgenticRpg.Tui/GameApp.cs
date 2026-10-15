@@ -108,8 +108,13 @@ namespace AgenticRpg.Tui
         {
             try
             {
-                await Task.Delay(2000, ct);
-                window!.AddGmMessage($"The **stone door** remains shut.\n\nYou wrote: {input}");
+                var response = await session!.SendAsync(input, ct);
+
+                logger.LogInformation("*** Turn completed ***\n-> Input:\n{Input}\n-> Output:\n{Output}\n-> Tokens: input={InputTokens}, output={OutputTokens}, total={TotalTokens}.",
+                    input, response.Text,
+                    response.Usage?.InputTokenCount, response.Usage?.OutputTokenCount, response.Usage?.TotalTokenCount);
+
+                window!.AddGmMessage(response.Text);
             }
             catch (OperationCanceledException) when (ct.IsCancellationRequested)
             {

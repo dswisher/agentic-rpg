@@ -174,27 +174,27 @@ private void OnWindowRunningChanging(object? sender, CancelEventArgs<bool> e)
 
 ## 3c: the real model
 
-- [ ] Replace the delay with `session!.SendAsync(input, ct)` and render
+- [x] Replace the delay with `session!.SendAsync(input, ct)` and render
       `response.Text`.
-- [ ] Log `response.Usage` as the CLI does.
-- [ ] Fix the fixed GM entry height (5 rows): try `Height = Dim.Auto()` on the
+- [x] Log `response.Usage` as the CLI does.
+- [x] Fix the fixed GM entry height (5 rows): try `Height = Dim.Auto()` on the
       entry and the `Markdown` view; if `Markdown` doesn't report its height
       properly, calculate the wrapped line count from the text and width.
-- [ ] Look at how the plain-text, 80-column prompt renders in a `Markdown`
+- [x] Look at how the plain-text, 80-column prompt renders in a `Markdown`
       view. Decide between plain text and Markdown, and whether the
       line-length rule still makes sense for the TUI.
-- [ ] Start with Ollama (free, local).
+- [x] Start with Ollama (free, local).
 
 Checks:
 
-- [ ] A normal turn.
-- [ ] A turn that calls `roll_dice`.
-- [ ] Request and response visible in `tui.log` (enable `Debug` for
+- [x] A normal turn.
+- [x] A turn that calls `roll_dice`.
+- [x] Request and response visible in `tui.log` (enable `Debug` for
       `Microsoft.Extensions.AI` for full payloads, if wanted).
-- [ ] Quitting mid-request: tests whether the provider honors cancellation. If
+- [x] Quitting mid-request: tests whether the provider honors cancellation. If
       it doesn't, the quit waits for the request, but the UI stays responsive.
-- [ ] Stopping the Ollama server mid-session shows the error path.
-- [ ] Smoke-test against Bedrock once Ollama works.
+- [x] Stopping the Ollama server mid-session shows the error path.
+- [x] Smoke-test against Bedrock once Ollama works.
 
 ## 3d: a key for cancelling
 

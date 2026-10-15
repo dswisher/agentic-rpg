@@ -126,7 +126,7 @@ namespace AgenticRpg.Tui
                 BorderStyle = LineStyle.Single,
                 X = 1,
                 Width = Dim.Fill(),
-                Height = 3
+                Height = Dim.Auto()
             };
 
             // Only show a border on the left
@@ -138,7 +138,7 @@ namespace AgenticRpg.Tui
                 X = 0,
                 Y = 0,
                 Width = Dim.Fill(),
-                Height = Dim.Fill()
+                Height = Dim.Auto()
             });
 
             AddEntry(entry);
@@ -152,7 +152,7 @@ namespace AgenticRpg.Tui
                 Title = "GM",
                 X = 1,
                 Width = Dim.Fill(),
-                Height = 5
+                Height = Dim.Auto()
             };
 
             entry.Add(new Markdown
@@ -161,7 +161,7 @@ namespace AgenticRpg.Tui
                 X = 0,
                 Y = 0,
                 Width = Dim.Fill(),
-                Height = Dim.Fill()
+                Height = Dim.Auto()
             });
 
             AddEntry(entry);
@@ -175,7 +175,7 @@ namespace AgenticRpg.Tui
                 Title = "System",
                 X = 1,
                 Width = Dim.Fill(),
-                Height = 3
+                Height = Dim.Auto()
             };
 
             entry.Add(new Label
@@ -184,7 +184,7 @@ namespace AgenticRpg.Tui
                 X = 0,
                 Y = 0,
                 Width = Dim.Fill(),
-                Height = Dim.Fill()
+                Height = Dim.Auto()
             });
 
             AddEntry(entry);
