@@ -1,6 +1,7 @@
 // Copyright (c) Doug Swisher. All Rights Reserved.
 // Licensed under the MIT License. See LICENSE.md in the project root for license information.
 
+using System.Collections.Generic;
 using AgenticRpg.Core.Models.World;
 
 namespace AgenticRpg.Core.Engine
@@ -9,8 +10,9 @@ namespace AgenticRpg.Core.Engine
     {
         public World Build()
         {
-            // Create the world that we'll populate
-            var world = new World();
+            // Create lists of rooms and items
+            var rooms = new List<Room>();
+            var items = new List<Item>();
 
             // Create the rooms, and add them to the world
             var briarGate = new Room
@@ -34,9 +36,9 @@ namespace AgenticRpg.Core.Engine
                 Description = "A tall, crumbling bell tower that overlooks the surrounding landscape, its bell long since fallen silent."
             };
 
-            world.Rooms.Add(briarGate);
-            world.Rooms.Add(cloister);
-            world.Rooms.Add(bellTower);
+            rooms.Add(briarGate);
+            rooms.Add(cloister);
+            rooms.Add(bellTower);
 
             // Link the rooms together
             briarGate.Exits.Add(new Exit
@@ -72,10 +74,15 @@ namespace AgenticRpg.Core.Engine
                 Location = new ItemLocation.InRoom(bellTower.Id)
             };
 
-            world.Items.Add(scroll);
+            items.Add(scroll);
 
             // Return the world!
-            return world;
+            return new World
+            {
+                Rooms = rooms,
+                Items = items,
+                StartingRoomId = briarGate.Id
+            };
         }
     }
 }

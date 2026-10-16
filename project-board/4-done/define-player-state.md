@@ -20,12 +20,12 @@ events, and history**, and **First milestones**.
 
 ## Acceptance Criteria
 
-- [ ] Player state records the current room.
-- [ ] Player state records the player's inventory.
-- [ ] Player state can be updated when the player changes rooms.
-- [ ] Player state can be updated when the player receives an item.
-- [ ] State is isolated between newly created game sessions.
-- [ ] State remains in memory; persistence is not required yet.
+- [x] Player state records the current room.
+- [x] Player state records the player's inventory.
+- [x] Player state can be updated when the player changes rooms.
+- [x] Player state can be updated when the player receives an item.
+- [x] State is isolated between newly created game sessions.
+- [x] State remains in memory; persistence is not required yet.
 
 ## Out of Scope
 
