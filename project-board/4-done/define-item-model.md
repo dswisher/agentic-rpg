@@ -17,11 +17,11 @@ milestones**.
 
 ## Acceptance Criteria
 
-- [ ] An item has a stable identifier.
-- [ ] An item has a display name and description.
-- [ ] An item has an engine-owned location.
-- [ ] An item can be located in a room or in the player's inventory.
-- [ ] The model is sufficient to represent the initial takeable item.
+- [x] An item has a stable identifier.
+- [x] An item has a display name and description.
+- [x] An item has an engine-owned location.
+- [x] An item can be located in a room or in the player's inventory.
+- [x] The model is sufficient to represent the initial takeable item.
 
 ## Out of Scope
 
