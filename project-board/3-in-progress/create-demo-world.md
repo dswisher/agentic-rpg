@@ -18,6 +18,13 @@ local commands. The world is hand-crafted and deterministic; the LLM is not
 involved. See `docs/RPG.md`, especially **Core architecture** and **First
 milestones**.
 
+GPT suggestion for three starting rooms, a small abandoned abbey:
+
+- Briar Gate (briar-gate)
+- Silent Cloister (silent-cloister)
+- Old Bell Tower (old-bell-tower)
+
+
 ## Acceptance Criteria
 
 - [ ] The world contains exactly three rooms.
