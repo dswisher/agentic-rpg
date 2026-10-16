@@ -3,6 +3,7 @@
 
 using AgenticRpg.Core.Agents;
 using AgenticRpg.Core.Clients;
+using AgenticRpg.Core.Engine;
 using AgenticRpg.Core.Tools;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -20,6 +21,8 @@ namespace AgenticRpg.Core
             services.AddSingleton<IOllamaClientFactory, OllamaClientFactory>();
 
             services.AddSingleton<IChatClientWrapper>(sp => sp.GetRequiredService<IClientFactory>().Create(modelName));
+
+            services.AddSingleton<IWorldBuilder, WorldBuilder>();
 
             // Session-specific bits are scoped
             services.AddScoped<IGameSession, GameSession>();

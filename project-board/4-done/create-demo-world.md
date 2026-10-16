@@ -27,12 +27,12 @@ GPT suggestion for three starting rooms, a small abandoned abbey:
 
 ## Acceptance Criteria
 
-- [ ] The world contains exactly three rooms.
-- [ ] The rooms have stable identifiers and useful descriptions.
-- [ ] The rooms have connected, named exits that support movement.
-- [ ] The world contains one visible, takeable item.
-- [ ] The item has a stable identifier, name, and description.
-- [ ] The world can be created repeatedly with the same results.
+- [x] The world contains exactly three rooms.
+- [x] The rooms have stable identifiers and useful descriptions.
+- [x] The rooms have connected, named exits that support movement.
+- [x] The world contains one visible, takeable item.
+- [x] The item has a stable identifier, name, and description.
+- [x] The world can be created repeatedly with the same results.
 
 ## Out of Scope
 
