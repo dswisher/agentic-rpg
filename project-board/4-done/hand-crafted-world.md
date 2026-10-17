@@ -2,6 +2,7 @@
 type: epic
 color: green
 priority: high
+done: 2026-10-17
 ---
 
 # Hand-Crafted World

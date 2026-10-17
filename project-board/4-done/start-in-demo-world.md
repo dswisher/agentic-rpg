@@ -2,6 +2,7 @@
 priority: high
 color: green
 epic: hand-crafted-world
+done: 2026-10-17
 depends_on:
   - define-player-state
   - create-demo-world
@@ -20,11 +21,11 @@ milestones**.
 
 ## Acceptance Criteria
 
-- [ ] A new game session loads the hand-crafted demo world.
-- [ ] The player starts in the designated starting room.
-- [ ] The player's inventory starts empty.
-- [ ] The initial state is available to the TUI.
-- [ ] Creating a second session does not reuse mutable state from the first.
+- [x] A new game session loads the hand-crafted demo world.
+- [x] The player starts in the designated starting room.
+- [x] The player's inventory starts empty.
+- [x] The initial state is available to the TUI.
+- [x] Creating a second session does not reuse mutable state from the first.
 
 ## Out of Scope
 

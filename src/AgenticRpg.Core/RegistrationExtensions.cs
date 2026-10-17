@@ -22,6 +22,7 @@ namespace AgenticRpg.Core
 
             services.AddSingleton<IChatClientWrapper>(sp => sp.GetRequiredService<IClientFactory>().Create(modelName));
 
+            services.AddSingleton<ISessionBuilder, SessionBuilder>();
             services.AddSingleton<IWorldBuilder, WorldBuilder>();
 
             // Chat-session-specific bits are scoped

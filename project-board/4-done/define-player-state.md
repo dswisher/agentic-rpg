@@ -2,6 +2,7 @@
 priority: high
 color: green
 epic: hand-crafted-world
+done: 2026-10-16
 depends_on:
   - define-room-model
   - define-item-model

@@ -6,6 +6,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 using AgenticRpg.Core.Agents;
+using AgenticRpg.Core.Engine;
+using AgenticRpg.Core.Models.World;
 using Microsoft.Extensions.Logging;
 using Terminal.Gui.App;
 
@@ -15,11 +17,13 @@ namespace AgenticRpg.Tui
     public sealed class GameApp
     {
         private readonly IChatSessionFactory sessionFactory;
+        private readonly ISessionBuilder sessionBuilder;
         private readonly ILogger<GameApp> logger;
 
         // Per-run state
         private GameWindow? window;
         private IChatSessionHandle? chat;
+        private Session? session;
         private IApplication? app;
         private CancellationTokenSource? turnCts;
         private bool turnActive;
@@ -28,9 +32,11 @@ namespace AgenticRpg.Tui
 
         public GameApp(
             IChatSessionFactory sessionFactory,
+            ISessionBuilder sessionBuilder,
             ILogger<GameApp> logger)
         {
             this.sessionFactory = sessionFactory;
+            this.sessionBuilder = sessionBuilder;
             this.logger = logger;
         }
 
@@ -39,9 +45,11 @@ namespace AgenticRpg.Tui
         {
             try
             {
+                // Create the chat session with the LLM
                 using var chatSession = sessionFactory.CreateSession();
                 chat = chatSession;
 
+                // Create the TUI app and game window
                 using var theApp = Application.Create();
                 app = theApp;
                 theApp.Init();
@@ -54,6 +62,10 @@ namespace AgenticRpg.Tui
 
                 logger.LogInformation("Starting game app...");
 
+                // Create the game session
+                session = sessionBuilder.Build();
+
+                // Run the TUI app
                 try
                 {
                     theApp.Run(gameWindow);

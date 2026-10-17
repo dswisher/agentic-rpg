@@ -38,7 +38,11 @@ namespace AgenticRpg.Core.Agents
                                Only respond with plain text (no markdown), lines should not be longer than 80 characters.
                                For any request involving a random outcome or dice roll, call roll_dice before answering. Never invent or claim a result without using the tool. Describe the result returned by the tool.
                                """,
-                Tools = [diceTool]
+                Tools = [diceTool],
+
+                // TODO: setting this seems to eliminate blank results on qwen 9b, but yields up strange results instead.
+                //   (I don't know how to roll a die. You rolled a 3.)
+                // Reasoning = new ReasoningOptions { Effort = ReasoningEffort.None }
             };
 
             var userMessage = new ChatMessage(ChatRole.User, input);

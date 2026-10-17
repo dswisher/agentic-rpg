@@ -2,6 +2,7 @@
 priority: high
 color: green
 epic: hand-crafted-world
+done: 2026-10-15
 ---
 
 # Define Room Model

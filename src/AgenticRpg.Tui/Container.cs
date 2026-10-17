@@ -12,7 +12,7 @@ namespace AgenticRpg.Tui
 {
     public static class Container
     {
-        public static ServiceProvider CreateContainer(string? modelName)
+        public static ServiceProvider CreateContainer(string? modelName, bool verbose)
         {
             // Create the collection that we'll populate with goodies
             var services = new ServiceCollection();
@@ -24,8 +24,18 @@ namespace AgenticRpg.Tui
             Directory.CreateDirectory(Path.GetDirectoryName(logPath)!);
             File.Delete(logPath);
 
-            var serilog = new LoggerConfiguration()
-                .MinimumLevel.Information()
+            var logConfig = new LoggerConfiguration();
+
+            if (verbose)
+            {
+                logConfig.MinimumLevel.Verbose();
+            }
+            else
+            {
+                logConfig.MinimumLevel.Information();
+            }
+
+            var serilog = logConfig
                 .Enrich.FromLogContext()
                 .WriteTo.File(logPath, outputTemplate:
                     "{Timestamp:HH:mm:ss.fff} [{Level:u3}] {SourceContext:l}: {Message:lj}{NewLine}{Exception}")
