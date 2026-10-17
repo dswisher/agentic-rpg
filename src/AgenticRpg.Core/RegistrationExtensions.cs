@@ -17,15 +17,15 @@ namespace AgenticRpg.Core
             services.AddSingleton<IChatClientEnhancer, ChatClientEnhancer>();
             services.AddSingleton<IClientFactory, ClientFactory>();
             services.AddSingleton<IDieRoller, DieRoller>();
-            services.AddSingleton<IGameAgent, GameAgent>();
+            services.AddSingleton<IChatSessionFactory, ChatSessionFactory>();
             services.AddSingleton<IOllamaClientFactory, OllamaClientFactory>();
 
             services.AddSingleton<IChatClientWrapper>(sp => sp.GetRequiredService<IClientFactory>().Create(modelName));
 
             services.AddSingleton<IWorldBuilder, WorldBuilder>();
 
-            // Session-specific bits are scoped
-            services.AddScoped<IGameSession, GameSession>();
+            // Chat-session-specific bits are scoped
+            services.AddScoped<IChatSession, ChatSession>();
         }
     }
 }

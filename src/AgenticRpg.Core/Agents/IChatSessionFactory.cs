@@ -3,8 +3,8 @@
 
 namespace AgenticRpg.Core.Agents
 {
-    public interface IGameAgent
+    public interface IChatSessionFactory
     {
-        IGameSessionHandle CreateSession();
+        IChatSessionHandle CreateSession();
     }
 }

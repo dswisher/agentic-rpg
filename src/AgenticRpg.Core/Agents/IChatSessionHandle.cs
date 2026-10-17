@@ -5,7 +5,7 @@ using System;
 
 namespace AgenticRpg.Core.Agents
 {
-    public interface IGameSessionHandle : IGameSession, IDisposable
+    public interface IChatSessionHandle : IChatSession, IDisposable
     {
     }
 }

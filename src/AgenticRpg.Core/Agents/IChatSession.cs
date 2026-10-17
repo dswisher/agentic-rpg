@@ -7,7 +7,7 @@ using Microsoft.Extensions.AI;
 
 namespace AgenticRpg.Core.Agents
 {
-    public interface IGameSession
+    public interface IChatSession
     {
         Task<ChatResponse> SendAsync(string input, CancellationToken cancellationToken = default);
     }

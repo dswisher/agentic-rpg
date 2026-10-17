@@ -6,25 +6,25 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace AgenticRpg.Core.Agents
 {
-    public class GameAgent : IGameAgent
+    public class ChatSessionFactory : IChatSessionFactory
     {
         private readonly IServiceScopeFactory scopeFactory;
 
-        public GameAgent(IServiceScopeFactory scopeFactory)
+        public ChatSessionFactory(IServiceScopeFactory scopeFactory)
         {
             this.scopeFactory = scopeFactory;
         }
 
 
-        public IGameSessionHandle CreateSession()
+        public IChatSessionHandle CreateSession()
         {
             var scope = scopeFactory.CreateScope();
 
             try
             {
-                var session = scope.ServiceProvider.GetRequiredService<IGameSession>();
+                var session = scope.ServiceProvider.GetRequiredService<IChatSession>();
 
-                return new ScopedGameSession(scope, session);
+                return new ScopedChatSession(scope, session);
             }
             catch (Exception)
             {

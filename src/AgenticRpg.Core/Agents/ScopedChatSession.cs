@@ -8,12 +8,12 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace AgenticRpg.Core.Agents
 {
-    public sealed class ScopedGameSession : IGameSessionHandle
+    public sealed class ScopedChatSession : IChatSessionHandle
     {
         private readonly IServiceScope scope;
-        private readonly IGameSession inner;
+        private readonly IChatSession inner;
 
-        public ScopedGameSession(IServiceScope scope, IGameSession inner)
+        public ScopedChatSession(IServiceScope scope, IChatSession inner)
         {
             this.scope = scope;
             this.inner = inner;

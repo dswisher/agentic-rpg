@@ -10,7 +10,7 @@ using Microsoft.Extensions.AI;
 
 namespace AgenticRpg.Core.Agents
 {
-    public sealed class GameSession : IGameSession
+    public sealed class ChatSession : IChatSession
     {
         private readonly IChatClientWrapper wrapper;
         private readonly IDieRoller dieRoller;
@@ -18,7 +18,7 @@ namespace AgenticRpg.Core.Agents
         private readonly List<ChatMessage> messages = new();
 
 
-        public GameSession(IChatClientWrapper wrapper, IDieRoller dieRoller)
+        public ChatSession(IChatClientWrapper wrapper, IDieRoller dieRoller)
         {
             this.wrapper = wrapper;
             this.dieRoller = dieRoller;

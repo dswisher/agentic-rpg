@@ -14,12 +14,12 @@ namespace AgenticRpg.Tui
     [SuppressMessage("Design", "CA1001:Types that own disposable fields should be disposable", Justification = "The disposable fields are disposed in Run()")]
     public sealed class GameApp
     {
-        private readonly IGameAgent agent;
+        private readonly IChatSessionFactory sessionFactory;
         private readonly ILogger<GameApp> logger;
 
         // Per-run state
         private GameWindow? window;
-        private IGameSessionHandle? session;
+        private IChatSessionHandle? chat;
         private IApplication? app;
         private CancellationTokenSource? turnCts;
         private bool turnActive;
@@ -27,10 +27,10 @@ namespace AgenticRpg.Tui
 
 
         public GameApp(
-            IGameAgent agent,
+            IChatSessionFactory sessionFactory,
             ILogger<GameApp> logger)
         {
-            this.agent = agent;
+            this.sessionFactory = sessionFactory;
             this.logger = logger;
         }
 
@@ -39,8 +39,8 @@ namespace AgenticRpg.Tui
         {
             try
             {
-                using var gameSession = agent.CreateSession();
-                session = gameSession;
+                using var chatSession = sessionFactory.CreateSession();
+                chat = chatSession;
 
                 using var theApp = Application.Create();
                 app = theApp;
@@ -66,7 +66,7 @@ namespace AgenticRpg.Tui
                 finally
                 {
                     window = null;
-                    session = null;
+                    chat = null;
                     app = null;
 
                     turnActive = false;
@@ -115,7 +115,7 @@ namespace AgenticRpg.Tui
         {
             try
             {
-                var response = await session!.SendAsync(input, ct);
+                var response = await chat!.SendAsync(input, ct);
 
                 logger.LogInformation("*** Turn completed ***\n-> Input:\n{Input}\n-> Output:\n{Output}\n-> Tokens: input={InputTokens}, output={OutputTokens}, total={TotalTokens}.",
                     input, response.Text,

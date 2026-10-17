@@ -10,12 +10,12 @@ namespace AgenticRpg.Cli
 {
     public class GameApp
     {
-        private readonly IGameAgent agent;
+        private readonly IChatSessionFactory sessionFactory;
         private readonly ILogger<GameApp> logger;
 
-        public GameApp(IGameAgent agent, ILogger<GameApp> logger)
+        public GameApp(IChatSessionFactory sessionFactory, ILogger<GameApp> logger)
         {
-            this.agent = agent;
+            this.sessionFactory = sessionFactory;
             this.logger = logger;
         }
 
@@ -23,7 +23,7 @@ namespace AgenticRpg.Cli
         public async Task RunAsync()
         {
             using var consoleCancellation = new ConsoleCancellation();
-            using var gameSession = agent.CreateSession();
+            using var chatSession = sessionFactory.CreateSession();
 
             while (true)
             {
@@ -49,7 +49,7 @@ namespace AgenticRpg.Cli
 
                 try
                 {
-                    var response = await gameSession.SendAsync(input, cancellationToken);
+                    var response = await chatSession.SendAsync(input, cancellationToken);
 
                     Console.WriteLine();
                     Console.WriteLine(response.Text);
