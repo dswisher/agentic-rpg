@@ -4,6 +4,7 @@
 using AgenticRpg.Core.Agents;
 using AgenticRpg.Core.Clients;
 using AgenticRpg.Core.Engine;
+using AgenticRpg.Core.Parsing;
 using AgenticRpg.Core.Tools;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -22,6 +23,7 @@ namespace AgenticRpg.Core
 
             services.AddSingleton<IChatClientWrapper>(sp => sp.GetRequiredService<IClientFactory>().Create(modelName));
 
+            services.AddSingleton<IParser, Parser>();
             services.AddSingleton<ISessionBuilder, SessionBuilder>();
             services.AddSingleton<IWorldBuilder, WorldBuilder>();
 

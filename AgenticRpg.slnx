@@ -4,4 +4,7 @@
     <Project Path="src/AgenticRpg.Core/AgenticRpg.Core.csproj" />
     <Project Path="src/AgenticRpg.Tui/AgenticRpg.Tui.csproj" />
   </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/AgenticRpg.UnitTests/AgenticRpg.UnitTests.csproj" />
+  </Folder>
 </Solution>
