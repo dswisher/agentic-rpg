@@ -10,6 +10,7 @@ using AgenticRpg.Core.Engine;
 using AgenticRpg.Core.Models.World;
 using Microsoft.Extensions.Logging;
 using Terminal.Gui.App;
+using Terminal.Gui.ViewBase;
 
 namespace AgenticRpg.Tui
 {
@@ -18,6 +19,7 @@ namespace AgenticRpg.Tui
     {
         private readonly IChatSessionFactory sessionFactory;
         private readonly ISessionBuilder sessionBuilder;
+        private readonly IGameCommandProcessor gameProcessor;
         private readonly ILogger<GameApp> logger;
 
         // Per-run state
@@ -33,10 +35,12 @@ namespace AgenticRpg.Tui
         public GameApp(
             IChatSessionFactory sessionFactory,
             ISessionBuilder sessionBuilder,
+            IGameCommandProcessor gameProcessor,
             ILogger<GameApp> logger)
         {
             this.sessionFactory = sessionFactory;
             this.sessionBuilder = sessionBuilder;
+            this.gameProcessor = gameProcessor;
             this.logger = logger;
         }
 
@@ -64,6 +68,18 @@ namespace AgenticRpg.Tui
 
                 // Create the game session
                 session = sessionBuilder.Build();
+
+                // Wait until the window has its real layout before adding the first chat entry.
+                // Otherwise the chat pane can calculate its initial scroll position using an
+                // uninitialized viewport and clip the top of the room description.
+                var initialLook = gameProcessor.Process(session, "look");
+                void OnInitialLayout(object? sender, LayoutEventArgs e)
+                {
+                    gameWindow.SubViewsLaidOut -= OnInitialLayout;
+                    DisplayGameResult(initialLook);
+                }
+
+                gameWindow.SubViewsLaidOut += OnInitialLayout;
 
                 // Run the TUI app
                 try
@@ -109,6 +125,27 @@ namespace AgenticRpg.Tui
             if (window != null && !turnActive)
             {
                 window.AddPlayerMessage(text);
+
+                GameTurnResult gameResult;
+                try
+                {
+                    gameResult = gameProcessor.Process(session!, text);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Command processing failed.");
+                    window.AddSystemMessage($"[error: {ex.Message}]");
+                    return;
+                }
+
+                if (gameResult is not GameTurnResult.DelegateToLlm delegated)
+                {
+                    DisplayGameResult(gameResult);
+                    return;
+                }
+
+                // Only LLM turns need the busy state and cancellation token source. Local
+                // commands complete synchronously and must not enter the async cancellation path.
                 window.SetBusy(true);
                 turnActive = true;
 
@@ -118,7 +155,36 @@ namespace AgenticRpg.Tui
                 // Not awaited: runs synchronously until its first await, then resumes on the UI
                 // thread via MainLoopSyncContext. It never faults (catches everything), and
                 // turnActive tracks completion.
-                _ = RunTurnAsync(text, turnCts.Token);
+                _ = RunTurnAsync(delegated.Input, turnCts.Token);
+            }
+        }
+
+
+        private void DisplayGameResult(GameTurnResult gameResult)
+        {
+            switch (gameResult)
+            {
+                case GameTurnResult.Handled { Result: CommandResult.Completed completed }:
+                    window!.AddGmMessage(completed.Message);
+                    break;
+
+                case GameTurnResult.Handled { Result: CommandResult.Rejected rejected }:
+                    window!.AddGmMessage(rejected.Message);
+                    break;
+
+                case GameTurnResult.InvalidInput invalid:
+                    window!.AddGmMessage(invalid.Reason);
+                    break;
+
+                case GameTurnResult.NoOp:
+                    break;
+
+                case GameTurnResult.DelegateToLlm:
+                    throw new InvalidOperationException("LLM-delegated input must be handled by the chat path.");
+
+                default:
+                    throw new InvalidOperationException(
+                        $"Don't know how to handle game result of type {gameResult.GetType().Name}");
             }
         }
 

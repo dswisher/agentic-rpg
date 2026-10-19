@@ -37,6 +37,12 @@ namespace AgenticRpg.Cli
             // Create the game session
             var session = sessionBuilder.Build();
 
+            // Show the player where they are before accepting input.
+            await HandleGameResultAsync(
+                gameProcessor.Process(session, "look"),
+                consoleCancellation,
+                chatSession);
+
             while (true)
             {
                 Console.Write("> ");
@@ -58,34 +64,42 @@ namespace AgenticRpg.Cli
                 }
 
                 var gameResult = gameProcessor.Process(session, input);
+                await HandleGameResultAsync(gameResult, consoleCancellation, chatSession);
+            }
+        }
 
-                if (gameResult is GameTurnResult.Handled handled)
+
+        private async Task HandleGameResultAsync(
+            GameTurnResult gameResult,
+            ConsoleCancellation consoleCancellation,
+            IChatSession chatSession)
+        {
+            if (gameResult is GameTurnResult.Handled handled)
+            {
+                if (handled.Result is CommandResult.Completed completed)
                 {
-                    if (handled.Result is CommandResult.Completed completed)
-                    {
-                        Console.WriteLine(completed.Message);
-                    }
-                    else if (handled.Result is CommandResult.Rejected rejected)
-                    {
-                        Console.WriteLine(rejected.Message);
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Don't know how to process handled result of type {handled.GetType().Name}");
-                    }
+                    Console.WriteLine(completed.Message);
                 }
-                else if (gameResult is GameTurnResult.DelegateToLlm delegated)
+                else if (handled.Result is CommandResult.Rejected rejected)
                 {
-                    await RunAgentChat(consoleCancellation, chatSession, delegated.Input);
+                    Console.WriteLine(rejected.Message);
                 }
-                else if (gameResult is GameTurnResult.InvalidInput invalid)
+                else
                 {
-                    Console.WriteLine(invalid.Reason);
+                    Console.WriteLine($"Don't know how to process command result of type {handled.Result.GetType().Name}");
                 }
-                else if (gameResult is not GameTurnResult.NoOp)
-                {
-                    Console.WriteLine($"Don't know how to handle game result of type {gameResult.GetType().Name}");
-                }
+            }
+            else if (gameResult is GameTurnResult.DelegateToLlm delegated)
+            {
+                await RunAgentChat(consoleCancellation, chatSession, delegated.Input);
+            }
+            else if (gameResult is GameTurnResult.InvalidInput invalid)
+            {
+                Console.WriteLine(invalid.Reason);
+            }
+            else if (gameResult is not GameTurnResult.NoOp)
+            {
+                Console.WriteLine($"Don't know how to handle game result of type {gameResult.GetType().Name}");
             }
         }
 
