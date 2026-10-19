@@ -23,6 +23,8 @@ namespace AgenticRpg.Core
 
             services.AddSingleton<IChatClientWrapper>(sp => sp.GetRequiredService<IClientFactory>().Create(modelName));
 
+            services.AddSingleton<ICommandExecutor, CommandExecutor>();
+            services.AddSingleton<IGameCommandProcessor, GameCommandProcessor>();
             services.AddSingleton<IParser, Parser>();
             services.AddSingleton<ISessionBuilder, SessionBuilder>();
             services.AddSingleton<IWorldBuilder, WorldBuilder>();

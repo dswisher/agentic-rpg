@@ -4,6 +4,7 @@
 using System;
 using System.Threading.Tasks;
 using AgenticRpg.Core.Agents;
+using AgenticRpg.Core.Engine;
 using Microsoft.Extensions.Logging;
 
 namespace AgenticRpg.Cli
@@ -11,11 +12,19 @@ namespace AgenticRpg.Cli
     public class GameApp
     {
         private readonly IChatSessionFactory sessionFactory;
+        private readonly ISessionBuilder sessionBuilder;
+        private readonly IGameCommandProcessor gameProcessor;
         private readonly ILogger<GameApp> logger;
 
-        public GameApp(IChatSessionFactory sessionFactory, ILogger<GameApp> logger)
+        public GameApp(
+            IChatSessionFactory sessionFactory,
+            ISessionBuilder sessionBuilder,
+            IGameCommandProcessor gameProcessor,
+            ILogger<GameApp> logger)
         {
             this.sessionFactory = sessionFactory;
+            this.sessionBuilder = sessionBuilder;
+            this.gameProcessor = gameProcessor;
             this.logger = logger;
         }
 
@@ -24,6 +33,9 @@ namespace AgenticRpg.Cli
         {
             using var consoleCancellation = new ConsoleCancellation();
             using var chatSession = sessionFactory.CreateSession();
+
+            // Create the game session
+            var session = sessionBuilder.Build();
 
             while (true)
             {
@@ -45,34 +57,68 @@ namespace AgenticRpg.Cli
                     break;
                 }
 
-                var cancellationToken = consoleCancellation.BeginRequest();
+                var gameResult = gameProcessor.Process(session, input);
 
-                try
+                if (gameResult is GameTurnResult.Handled handled)
                 {
-                    var response = await chatSession.SendAsync(input, cancellationToken);
-
-                    Console.WriteLine();
-                    Console.WriteLine(response.Text);
-                    Console.WriteLine();
-
-                    if (response.Usage is { } usage)
+                    if (handled.Result is CommandResult.Completed completed)
                     {
-                        logger.LogInformation("...tokens: input={InputTokens}, output={OutputTokens}, total={TotalTokens}.", usage.InputTokenCount, usage.OutputTokenCount, usage.TotalTokenCount);
+                        Console.WriteLine(completed.Message);
+                    }
+                    else if (handled.Result is CommandResult.Rejected rejected)
+                    {
+                        Console.WriteLine(rejected.Message);
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Don't know how to process handled result of type {handled.GetType().Name}");
                     }
                 }
-                catch (OperationCanceledException)
+                else if (gameResult is GameTurnResult.DelegateToLlm delegated)
                 {
-                    Console.WriteLine();
-                    Console.WriteLine("[cancelled]");
+                    await RunAgentChat(consoleCancellation, chatSession, delegated.Input);
                 }
-                catch (Exception ex)
+                else if (gameResult is GameTurnResult.InvalidInput invalid)
                 {
-                    logger.LogError(ex, "Error getting response from chat client.");
+                    Console.WriteLine(invalid.Reason);
                 }
-                finally
+                else if (gameResult is not GameTurnResult.NoOp)
                 {
-                    consoleCancellation.EndRequest();
+                    Console.WriteLine($"Don't know how to handle game result of type {gameResult.GetType().Name}");
                 }
+            }
+        }
+
+
+        private async Task RunAgentChat(ConsoleCancellation consoleCancellation, IChatSession chatSession, string input)
+        {
+            var cancellationToken = consoleCancellation.BeginRequest();
+
+            try
+            {
+                var response = await chatSession.SendAsync(input, cancellationToken);
+
+                Console.WriteLine();
+                Console.WriteLine(response.Text);
+                Console.WriteLine();
+
+                if (response.Usage is { } usage)
+                {
+                    logger.LogInformation("...tokens: input={InputTokens}, output={OutputTokens}, total={TotalTokens}.", usage.InputTokenCount, usage.OutputTokenCount, usage.TotalTokenCount);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                Console.WriteLine();
+                Console.WriteLine("[cancelled]");
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error getting response from chat client.");
+            }
+            finally
+            {
+                consoleCancellation.EndRequest();
             }
         }
     }

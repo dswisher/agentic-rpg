@@ -7,7 +7,7 @@ namespace AgenticRpg.Core.Commands
     {
         public sealed record Inventory() : GameCommand;
         public sealed record Look() : GameCommand;
-        public sealed record Move(string Target) : GameCommand;
+        public sealed record Move(string Direction) : GameCommand;
         public sealed record Take(string ItemName) : GameCommand;
     }
 }
