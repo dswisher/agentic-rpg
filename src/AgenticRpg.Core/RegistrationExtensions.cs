@@ -25,6 +25,7 @@ namespace AgenticRpg.Core
             // Register all the LLM tools
             services.AddSingleton<IGameTool, CurrentSceneTool>();
             services.AddSingleton<IGameTool, DieRoller>();
+            services.AddSingleton<IGameTool, GetPlayerInventoryTool>();
 
             // Set up the chat client wrapper factory
             services.AddSingleton<IChatClientWrapper>(sp => sp.GetRequiredService<IClientFactory>().Create(modelName));
