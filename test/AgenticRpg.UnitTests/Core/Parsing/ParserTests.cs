@@ -19,6 +19,7 @@ namespace AgenticRpg.UnitTests.Core.Parsing
             { "move north", new GameCommand.Move("north") },
             { " move north ", new GameCommand.Move("north") },
             { "move\tnorth", new GameCommand.Move("north") },
+            { "drop loot", new GameCommand.Drop("loot") },
             { "take loot", new GameCommand.Take("loot") },
         };
 
@@ -54,6 +55,7 @@ namespace AgenticRpg.UnitTests.Core.Parsing
 
         [Theory]
         [InlineData("move", "Missing argument")]
+        [InlineData("drop", "Missing argument")]
         [InlineData("take", "Missing argument")]
         public void InvalidOneArgumentCommandsAreHandled(string input, string reason)
         {

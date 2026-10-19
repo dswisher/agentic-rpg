@@ -115,6 +115,72 @@ namespace AgenticRpg.UnitTests.Core.Engine
 
 
         [Fact]
+        public void CanDropInventoryItemIntoCurrentRoom()
+        {
+            // Arrange
+            var session = CreateSession();
+            session.Player.CurrentRoomId = "room-2";
+            var scroll = session.World.Items.Single(item => item.Id == "ancient-scroll");
+            scroll.Location = new ItemLocation.InPlayerInventory();
+
+            // Act
+            var result = executor.Execute(session, new GameCommand.Drop("SCROLL"));
+
+            // Assert
+            var completed = result.Should().BeOfType<CommandResult.Completed>().Which;
+
+            completed.Message.Should().Contain("Ancient Scroll");
+            scroll.Location.Should().BeOfType<ItemLocation.InRoom>().Which.RoomId.Should().Be("room-2");
+        }
+
+
+        [Fact]
+        public void CannotDropItemThatIsNotInInventory()
+        {
+            // Arrange
+            var session = CreateSession();
+            var scroll = session.World.Items.Single(item => item.Id == "ancient-scroll");
+
+            // Act
+            var result = executor.Execute(session, new GameCommand.Drop("scroll"));
+
+            // Assert
+            var rejected = result.Should().BeOfType<CommandResult.Rejected>().Which;
+
+            rejected.Message.Should().Contain("inventory");
+            scroll.Location.Should().BeOfType<ItemLocation.InRoom>().Which.RoomId.Should().Be("room-1");
+        }
+
+
+        [Fact]
+        public void AmbiguousInventoryItemNameIsRejectedWhenDropping()
+        {
+            // Arrange
+            var session = CreateSession();
+            var scroll = session.World.Items.Single(item => item.Id == "ancient-scroll");
+            scroll.Location = new ItemLocation.InPlayerInventory();
+            var silverScroll = new Item
+            {
+                Id = "silver-scroll",
+                Name = "Silver Scroll",
+                Description = "A silver scroll.",
+                Location = new ItemLocation.InPlayerInventory()
+            };
+            session.World.Items.Add(silverScroll);
+
+            // Act
+            var result = executor.Execute(session, new GameCommand.Drop("scroll"));
+
+            // Assert
+            var rejected = result.Should().BeOfType<CommandResult.Rejected>().Which;
+
+            rejected.Message.Should().Contain("More than one item");
+            scroll.Location.Should().BeOfType<ItemLocation.InPlayerInventory>();
+            silverScroll.Location.Should().BeOfType<ItemLocation.InPlayerInventory>();
+        }
+
+
+        [Fact]
         public void CanTakeItemInCurrentRoomByNamePart()
         {
             // Arrange

@@ -24,12 +24,40 @@ namespace AgenticRpg.Core.Engine
                 GameCommand.Move move =>
                     ExecuteMove(session, move.Direction),
 
+                GameCommand.Drop drop =>
+                    ExecuteDrop(session, drop.ItemName),
+
                 GameCommand.Take take =>
                     ExecuteTake(session, take.ItemName),
 
                 _ => throw new InvalidOperationException(
                     $"Don't know how to handle GameCommand {command.GetType().Name}")
             };
+        }
+
+
+        private static CommandResult ExecuteDrop(Session session, string itemName)
+        {
+            var matchingItems = session.World.Items
+                .Where(item =>
+                    item.Location is ItemLocation.InPlayerInventory &&
+                    ItemNameMatches(item.Name, itemName))
+                .ToList();
+
+            if (matchingItems.Count == 0)
+            {
+                return new CommandResult.Rejected($"There is no item named '{itemName}' in your inventory.");
+            }
+
+            if (matchingItems.Count > 1)
+            {
+                return new CommandResult.Rejected($"More than one item in your inventory matches '{itemName}'.");
+            }
+
+            var item = matchingItems[0];
+            item.Location = new ItemLocation.InRoom(session.Player.CurrentRoomId);
+
+            return new CommandResult.Completed($"You drop the {item.Name}.");
         }
 
 

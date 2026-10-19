@@ -27,7 +27,7 @@ namespace AgenticRpg.Core.Parsing
                     "inventory" => new ParseResult.Local(new GameCommand.Inventory()),
                     "look" => new ParseResult.Local(new GameCommand.Look()),
 
-                    "move" or "take" => new ParseResult.Invalid("Missing argument"),
+                    "move" or "take" or "drop" => new ParseResult.Invalid("Missing argument"),
 
                     _ => new ParseResult.DelegateToLlm(input)
                 };
@@ -38,6 +38,7 @@ namespace AgenticRpg.Core.Parsing
                 return verb switch
                 {
                     "move" => new ParseResult.Local(new GameCommand.Move(words[1])),
+                    "drop" => new ParseResult.Local(new GameCommand.Drop(words[1])),
                     "take" => new ParseResult.Local(new GameCommand.Take(words[1])),
 
                     _ => new ParseResult.DelegateToLlm(input)
