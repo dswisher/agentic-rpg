@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See LICENSE.md in the project root for license information.
 
 using System.Collections.Generic;
+using System.Linq;
 using AgenticRpg.Core.Commands;
 using AgenticRpg.Core.Engine;
 using AgenticRpg.Core.Models.World;
@@ -34,6 +35,7 @@ namespace AgenticRpg.UnitTests.Core.Engine
             completed.Message.Should().Contain("Second Item");
 
             completed.Message.Should().NotContain("First Item");
+            completed.Message.Should().NotContain("Ancient Scroll");
         }
 
 
@@ -71,6 +73,70 @@ namespace AgenticRpg.UnitTests.Core.Engine
 
             rejected.Message.Should().Contain("no exit");
             rejected.Message.Should().Contain("east");
+        }
+
+
+        [Fact]
+        public void CanTakeItemInCurrentRoomByNamePart()
+        {
+            // Arrange
+            var session = CreateSession();
+            var scroll = session.World.Items.Single(item => item.Id == "ancient-scroll");
+
+            // Act
+            var result = executor.Execute(session, new GameCommand.Take("SCROLL"));
+
+            // Assert
+            var completed = result.Should().BeOfType<CommandResult.Completed>().Which;
+
+            completed.Message.Should().Contain("Ancient Scroll");
+            scroll.Location.Should().BeOfType<ItemLocation.InPlayerInventory>();
+        }
+
+
+        [Fact]
+        public void CannotTakeItemThatIsNotInCurrentRoom()
+        {
+            // Arrange
+            var session = CreateSession();
+            session.Player.CurrentRoomId = "room-2";
+            var scroll = session.World.Items.Single(item => item.Id == "ancient-scroll");
+
+            // Act
+            var result = executor.Execute(session, new GameCommand.Take("scroll"));
+
+            // Assert
+            var rejected = result.Should().BeOfType<CommandResult.Rejected>().Which;
+
+            rejected.Message.Should().Contain("scroll");
+            scroll.Location.Should().BeOfType<ItemLocation.InRoom>().Which.RoomId.Should().Be("room-1");
+        }
+
+
+        [Fact]
+        public void AmbiguousItemNameIsRejected()
+        {
+            // Arrange
+            var session = CreateSession();
+            var scroll = session.World.Items.Single(item => item.Id == "ancient-scroll");
+            var silverScroll = new Item
+            {
+                Id = "silver-scroll",
+                Name = "Silver Scroll",
+                Description = "A silver scroll.",
+                Location = new ItemLocation.InRoom("room-1")
+            };
+            session.World.Items.Add(silverScroll);
+
+            // Act
+            var result = executor.Execute(session, new GameCommand.Take("scroll"));
+
+            // Assert
+            var rejected = result.Should().BeOfType<CommandResult.Rejected>().Which;
+
+            rejected.Message.Should().Contain("More than one item");
+            scroll.Location.Should().BeOfType<ItemLocation.InRoom>().Which.RoomId.Should().Be("room-1");
+            silverScroll.Location.Should().BeOfType<ItemLocation.InRoom>().Which.RoomId.Should().Be("room-1");
         }
 
 
@@ -136,8 +202,17 @@ namespace AgenticRpg.UnitTests.Core.Engine
                 Location = new ItemLocation.InRoom(room2.Id)
             };
 
+            var scroll = new Item
+            {
+                Id = "ancient-scroll",
+                Name = "Ancient Scroll",
+                Description = "An ancient scroll.",
+                Location = new ItemLocation.InRoom(room1.Id)
+            };
+
             items.Add(item1);
             items.Add(item2);
+            items.Add(scroll);
 
             // Return the world!
             return new World

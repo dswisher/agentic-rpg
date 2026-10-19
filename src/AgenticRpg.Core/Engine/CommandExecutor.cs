@@ -21,9 +21,53 @@ namespace AgenticRpg.Core.Engine
                 GameCommand.Move move =>
                     ExecuteMove(session, move.Direction),
 
+                GameCommand.Take take =>
+                    ExecuteTake(session, take.ItemName),
+
                 _ => throw new InvalidOperationException(
                     $"Don't know how to handle GameCommand {command.GetType().Name}")
             };
+        }
+
+
+        private static CommandResult ExecuteTake(Session session, string itemName)
+        {
+            var matchingItems = session.World.Items
+                .Where(item =>
+                    item.Location is ItemLocation.InRoom inRoom &&
+                    inRoom.RoomId == session.Player.CurrentRoomId &&
+                    ItemNameMatches(item.Name, itemName))
+                .ToList();
+
+            if (matchingItems.Count == 0)
+            {
+                return new CommandResult.Rejected($"There is no item named '{itemName}' here.");
+            }
+
+            if (matchingItems.Count > 1)
+            {
+                return new CommandResult.Rejected($"More than one item here matches '{itemName}'.");
+            }
+
+            var item = matchingItems[0];
+            item.Location = new ItemLocation.InPlayerInventory();
+
+            return new CommandResult.Completed($"You take the {item.Name}.");
+        }
+
+
+        private static bool ItemNameMatches(string itemName, string requestedName)
+        {
+            if (string.Equals(itemName, requestedName, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            var nameParts = itemName.Split(
+                (char[]?)null,
+                StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            return nameParts.Any(part => string.Equals(part, requestedName, StringComparison.OrdinalIgnoreCase));
         }
 
 
