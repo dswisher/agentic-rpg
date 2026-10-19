@@ -19,6 +19,7 @@ namespace AgenticRpg.Core
             services.AddSingleton<IChatClientEnhancer, ChatClientEnhancer>();
             services.AddSingleton<IChatSessionFactory, ChatSessionFactory>();
             services.AddSingleton<IClientFactory, ClientFactory>();
+            services.AddSingleton<IConfigLoader, ConfigLoader>();
             services.AddSingleton<IOllamaClientFactory, OllamaClientFactory>();
 
             // Register all the LLM tools

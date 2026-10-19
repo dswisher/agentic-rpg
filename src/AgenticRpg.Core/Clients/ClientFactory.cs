@@ -2,10 +2,7 @@
 // Licensed under the MIT License. See LICENSE.md in the project root for license information.
 
 using System;
-using System.IO;
 using System.Linq;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using AgenticRpg.Core.Models.Config;
 using Microsoft.Extensions.Logging;
 
@@ -13,26 +10,21 @@ namespace AgenticRpg.Core.Clients
 {
     public class ClientFactory : IClientFactory
     {
-        private static readonly JsonSerializerOptions serializerOptions = new()
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            ReadCommentHandling = JsonCommentHandling.Skip,
-            AllowTrailingCommas = true,
-            UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow,
-            RespectNullableAnnotations = true
-        };
-
         private readonly IBedrockClientFactory bedrockFactory;
         private readonly IOllamaClientFactory ollamaFactory;
+        private readonly IConfigLoader configLoader;
         private readonly ILogger<ClientFactory> logger;
+
 
         public ClientFactory(
             IBedrockClientFactory bedrockFactory,
             IOllamaClientFactory ollamaFactory,
+            IConfigLoader configLoader,
             ILogger<ClientFactory> logger)
         {
             this.bedrockFactory = bedrockFactory;
             this.ollamaFactory = ollamaFactory;
+            this.configLoader = configLoader;
             this.logger = logger;
         }
 
@@ -40,7 +32,7 @@ namespace AgenticRpg.Core.Clients
         public IChatClientWrapper Create(string? modelName)
         {
             // Read the config
-            var config = LoadConfig<ConfigFile>("config.jsonc", "config");
+            var config = configLoader.LoadConfig<ConfigFile>("config.jsonc", "config");
 
             // Pick apart the config, and find the model config
             modelName ??= config.DefaultModel;
@@ -54,7 +46,7 @@ namespace AgenticRpg.Core.Clients
             AuthEntry? authEntry = null;
             if (!string.IsNullOrEmpty(modelConfig.AuthProfile))
             {
-                var authConfig = LoadConfig<AuthConfig>("auth.jsonc", "auth config");
+                var authConfig = configLoader.LoadConfig<AuthConfig>("auth.jsonc", "auth config");
 
                 if (!authConfig.Profiles.TryGetValue(modelConfig.AuthProfile, out authEntry))
                 {
@@ -69,33 +61,6 @@ namespace AgenticRpg.Core.Clients
                 "ollama" => ollamaFactory.Create(modelConfig),
                 _ => throw new InvalidOperationException($"Unknown provider '{modelConfig.Provider}' for model '{modelConfig.Name}'."),
             };
-        }
-
-
-        private T LoadConfig<T>(string filename, string kind)
-        {
-            var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            var configFilePath = Path.Join(userProfile, ".config", "agentic-rpg", filename);
-
-            if (!File.Exists(configFilePath))
-            {
-                throw new FileNotFoundException($"{kind} file not found: {configFilePath}");
-            }
-
-            logger.LogInformation("...reading {Kind} file {ConfigFilePath}", kind, configFilePath);
-
-            T? config;
-            using (var stream = File.OpenRead(configFilePath))
-            {
-                config = JsonSerializer.Deserialize<T>(stream, serializerOptions);
-            }
-
-            if (config == null)
-            {
-                throw new InvalidOperationException($"Failed to deserialize {kind} file.");
-            }
-
-            return config;
         }
     }
 }
