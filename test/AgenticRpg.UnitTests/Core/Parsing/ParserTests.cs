@@ -17,10 +17,29 @@ namespace AgenticRpg.UnitTests.Core.Parsing
         public static TheoryData<string, GameCommand> OneArgumentCommands => new()
         {
             { "move north", new GameCommand.Move("north") },
+            { "move n", new GameCommand.Move("north") },
+            { "MOVE U", new GameCommand.Move("up") },
             { " move north ", new GameCommand.Move("north") },
             { "move\tnorth", new GameCommand.Move("north") },
             { "drop loot", new GameCommand.Drop("loot") },
             { "take loot", new GameCommand.Take("loot") },
+        };
+
+
+        public static TheoryData<string, GameCommand.Move> DirectionAliases => new()
+        {
+            { "up", new GameCommand.Move("up") },
+            { "u", new GameCommand.Move("up") },
+            { "down", new GameCommand.Move("down") },
+            { "d", new GameCommand.Move("down") },
+            { "north", new GameCommand.Move("north") },
+            { "n", new GameCommand.Move("north") },
+            { "south", new GameCommand.Move("south") },
+            { "s", new GameCommand.Move("south") },
+            { "east", new GameCommand.Move("east") },
+            { "e", new GameCommand.Move("east") },
+            { "west", new GameCommand.Move("west") },
+            { "w", new GameCommand.Move("west") },
         };
 
 
@@ -72,6 +91,20 @@ namespace AgenticRpg.UnitTests.Core.Parsing
         [Theory]
         [MemberData(nameof(OneArgumentCommands))]
         public void CanParseOneArgumentLocalCommand(string input, GameCommand expected)
+        {
+            // Act
+            var parsed = parser.Parse(input);
+
+            // Assert
+            var local = parsed.Should().BeOfType<ParseResult.Local>().Which;
+
+            local.Command.Should().Be(expected);
+        }
+
+
+        [Theory]
+        [MemberData(nameof(DirectionAliases))]
+        public void CanParseDirectionAliasAsMove(string input, GameCommand.Move expected)
         {
             // Act
             var parsed = parser.Parse(input);

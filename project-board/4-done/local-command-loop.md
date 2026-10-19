@@ -2,6 +2,7 @@
 type: epic
 color: blue
 priority: high
+done: 2026-10-19
 depends_on:
   - hand-crafted-world
 ---

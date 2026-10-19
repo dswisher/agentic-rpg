@@ -22,6 +22,12 @@ namespace AgenticRpg.Core.Parsing
 
             if (words.Length == 1)
             {
+                var direction = GetCanonicalDirection(verb);
+                if (direction != null)
+                {
+                    return new ParseResult.Local(new GameCommand.Move(direction));
+                }
+
                 return verb switch
                 {
                     "inventory" => new ParseResult.Local(new GameCommand.Inventory()),
@@ -37,7 +43,7 @@ namespace AgenticRpg.Core.Parsing
             {
                 return verb switch
                 {
-                    "move" => new ParseResult.Local(new GameCommand.Move(words[1])),
+                    "move" => new ParseResult.Local(new GameCommand.Move(GetCanonicalDirection(words[1]) ?? words[1])),
                     "drop" => new ParseResult.Local(new GameCommand.Drop(words[1])),
                     "take" => new ParseResult.Local(new GameCommand.Take(words[1])),
 
@@ -46,6 +52,21 @@ namespace AgenticRpg.Core.Parsing
             }
 
             return new ParseResult.DelegateToLlm(input);
+        }
+
+
+        private static string? GetCanonicalDirection(string direction)
+        {
+            return direction.ToLowerInvariant() switch
+            {
+                "up" or "u" => "up",
+                "down" or "d" => "down",
+                "north" or "n" => "north",
+                "south" or "s" => "south",
+                "east" or "e" => "east",
+                "west" or "w" => "west",
+                _ => null
+            };
         }
     }
 }

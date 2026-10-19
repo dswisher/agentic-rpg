@@ -2,6 +2,7 @@
 color: blue
 priority: high
 epic: local-command-loop
+done: 2026-10-19
 depends_on:
   - parser-part-1
 ---
