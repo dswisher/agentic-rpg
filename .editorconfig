@@ -201,6 +201,14 @@ dotnet_diagnostic.CA1305.severity = none
 
 
 # -------------------------------------------------------------------------
+# Disable some resharper warnings
+# -------------------------------------------------------------------------
+
+# Positional property 'name' is never accessed (except in implicit Equals/ToString implementations)
+resharper_not_accessed_positional_property_global_highlighting = none
+
+
+# -------------------------------------------------------------------------
 # Core library - strive to follow class library conventions
 # -------------------------------------------------------------------------
 

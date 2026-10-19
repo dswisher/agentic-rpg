@@ -22,6 +22,7 @@ namespace AgenticRpg.Core
             services.AddSingleton<IOllamaClientFactory, OllamaClientFactory>();
 
             // Register all the LLM tools
+            services.AddSingleton<IGameTool, CurrentSceneTool>();
             services.AddSingleton<IGameTool, DieRoller>();
 
             // Set up the chat client wrapper factory

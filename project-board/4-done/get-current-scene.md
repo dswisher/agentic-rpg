@@ -3,6 +3,7 @@ type: story
 color: blue
 priority: medium
 epic: grounded-llm-player-interaction
+done: 2026-10-19
 depends_on:
   - provide-game-session-to-tools
 ---
@@ -15,11 +16,11 @@ investigate here?” without disclosing unexplored parts of the world.
 
 ## Acceptance Criteria
 
-- [ ] The tool returns the current room's name and description.
-- [ ] The tool returns visible item names and available exit directions.
-- [ ] The tool does not return destination room names, unseen items, or other
+- [x] The tool returns the current room's name and description.
+- [x] The tool returns visible item names and available exit directions.
+- [x] The tool does not return destination room names, unseen items, or other
   information outside the current scene.
-- [ ] Tests verify the returned scene changes when the player moves.
+- [x] Tests verify the returned scene changes when the player moves.
 
 ## Sample Player Inputs
 
