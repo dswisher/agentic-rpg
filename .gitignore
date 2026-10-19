@@ -5,3 +5,6 @@ obj
 .idea
 AgenticRpg.sln.DotSettings.user
 
+test/AgenticRpg.UnitTests/test-results
+test/AgenticRpg.UnitTests/coverage-report
+

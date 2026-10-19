@@ -223,3 +223,13 @@ dotnet_diagnostic.CA2007.severity = warning
 [test/**/*.cs]
 # Unused parameters common in test fixture setup
 dotnet_code_quality_unused_parameters = non_public:warning
+
+
+# -------------------------------------------------------------------------
+# Makefiles need tabs
+# -------------------------------------------------------------------------
+[**/Makefile]
+indent_style = tab
+indent_size = tab
+tab_width = 4
+
