@@ -14,15 +14,20 @@ namespace AgenticRpg.Core
     {
         public static void AddCoreServices(this IServiceCollection services, string? modelName)
         {
+            // Register the LLM client machinery
             services.AddSingleton<IBedrockClientFactory, BedrockClientFactory>();
             services.AddSingleton<IChatClientEnhancer, ChatClientEnhancer>();
-            services.AddSingleton<IClientFactory, ClientFactory>();
-            services.AddSingleton<IDieRoller, DieRoller>();
             services.AddSingleton<IChatSessionFactory, ChatSessionFactory>();
+            services.AddSingleton<IClientFactory, ClientFactory>();
             services.AddSingleton<IOllamaClientFactory, OllamaClientFactory>();
 
+            // Register all the LLM tools
+            services.AddSingleton<IGameTool, DieRoller>();
+
+            // Set up the chat client wrapper factory
             services.AddSingleton<IChatClientWrapper>(sp => sp.GetRequiredService<IClientFactory>().Create(modelName));
 
+            // Register the game mechanics
             services.AddSingleton<ICommandExecutor, CommandExecutor>();
             services.AddSingleton<IGameCommandProcessor, GameCommandProcessor>();
             services.AddSingleton<IParser, Parser>();

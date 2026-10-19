@@ -155,7 +155,7 @@ namespace AgenticRpg.Tui
                 // Not awaited: runs synchronously until its first await, then resumes on the UI
                 // thread via MainLoopSyncContext. It never faults (catches everything), and
                 // turnActive tracks completion.
-                _ = RunTurnAsync(delegated.Input, turnCts.Token);
+                _ = RunTurnAsync(delegated.Input, session!, turnCts.Token);
             }
         }
 
@@ -189,11 +189,11 @@ namespace AgenticRpg.Tui
         }
 
 
-        private async Task RunTurnAsync(string input, CancellationToken ct)
+        private async Task RunTurnAsync(string input, Session gameSession, CancellationToken ct)
         {
             try
             {
-                var response = await chat!.SendAsync(input, ct);
+                var response = await chat!.SendAsync(input, gameSession, ct);
 
                 logger.LogInformation("*** Turn completed ***\n-> Input:\n{Input}\n-> Output:\n{Output}\n-> Tokens: input={InputTokens}, output={OutputTokens}, total={TotalTokens}.",
                     input, response.Text,

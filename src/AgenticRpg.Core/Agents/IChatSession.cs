@@ -3,12 +3,16 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using AgenticRpg.Core.Models.World;
 using Microsoft.Extensions.AI;
 
 namespace AgenticRpg.Core.Agents
 {
     public interface IChatSession
     {
-        Task<ChatResponse> SendAsync(string input, CancellationToken cancellationToken = default);
+        Task<ChatResponse> SendAsync(
+            string input,
+            Session gameSession,
+            CancellationToken cancellationToken = default);
     }
 }

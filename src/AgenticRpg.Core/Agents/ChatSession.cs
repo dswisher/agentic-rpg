@@ -1,10 +1,13 @@
 // Copyright (c) Doug Swisher. All Rights Reserved.
 // Licensed under the MIT License. See LICENSE.md in the project root for license information.
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AgenticRpg.Core.Clients;
+using AgenticRpg.Core.Models.World;
 using AgenticRpg.Core.Tools;
 using Microsoft.Extensions.AI;
 
@@ -13,24 +16,29 @@ namespace AgenticRpg.Core.Agents
     public sealed class ChatSession : IChatSession
     {
         private readonly IChatClientWrapper wrapper;
-        private readonly IDieRoller dieRoller;
+        private readonly IEnumerable<IGameTool> gameTools;
 
         private readonly List<ChatMessage> messages = new();
 
 
-        public ChatSession(IChatClientWrapper wrapper, IDieRoller dieRoller)
+        public ChatSession(
+            IChatClientWrapper wrapper,
+            IEnumerable<IGameTool> gameTools)
         {
             this.wrapper = wrapper;
-            this.dieRoller = dieRoller;
+            this.gameTools = gameTools;
         }
 
 
-        public async Task<ChatResponse> SendAsync(string input, CancellationToken cancellationToken = default)
+        public async Task<ChatResponse> SendAsync(
+            string input,
+            Session gameSession,
+            CancellationToken cancellationToken = default)
         {
-            var diceTool = AIFunctionFactory.Create(
-                (int sides) => dieRoller.RollDice(sides),
-                name: "roll_dice",
-                description: "Roll one fair die. The sides value must be between 2 and 1000.");
+            ArgumentNullException.ThrowIfNull(gameSession);
+            var tools = gameTools
+                .Select(tool => tool.Create(gameSession))
+                .ToList<AITool>();
 
             var chatOptions = new ChatOptions
             {
@@ -38,7 +46,7 @@ namespace AgenticRpg.Core.Agents
                                Only respond with plain text (no markdown), lines should not be longer than 80 characters.
                                For any request involving a random outcome or dice roll, call roll_dice before answering. Never invent or claim a result without using the tool. Describe the result returned by the tool.
                                """,
-                Tools = [diceTool],
+                Tools = tools,
 
                 // TODO: setting this seems to eliminate blank results on qwen 9b, but yields up strange results instead.
                 //   (I don't know how to roll a die. You rolled a 3.)

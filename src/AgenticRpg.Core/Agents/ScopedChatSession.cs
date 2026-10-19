@@ -3,6 +3,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using AgenticRpg.Core.Models.World;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -20,8 +21,10 @@ namespace AgenticRpg.Core.Agents
         }
 
         public Task<ChatResponse> SendAsync(
-            string input, CancellationToken cancellationToken = default) =>
-            inner.SendAsync(input, cancellationToken);
+            string input,
+            Session gameSession,
+            CancellationToken cancellationToken = default) =>
+            inner.SendAsync(input, gameSession, cancellationToken);
 
 
         public void Dispose() => scope.Dispose();

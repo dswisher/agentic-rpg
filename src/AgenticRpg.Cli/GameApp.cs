@@ -5,6 +5,7 @@ using System;
 using System.Threading.Tasks;
 using AgenticRpg.Core.Agents;
 using AgenticRpg.Core.Engine;
+using AgenticRpg.Core.Models.World;
 using Microsoft.Extensions.Logging;
 
 namespace AgenticRpg.Cli
@@ -41,7 +42,8 @@ namespace AgenticRpg.Cli
             await HandleGameResultAsync(
                 gameProcessor.Process(session, "look"),
                 consoleCancellation,
-                chatSession);
+                chatSession,
+                session);
 
             while (true)
             {
@@ -64,7 +66,7 @@ namespace AgenticRpg.Cli
                 }
 
                 var gameResult = gameProcessor.Process(session, input);
-                await HandleGameResultAsync(gameResult, consoleCancellation, chatSession);
+                await HandleGameResultAsync(gameResult, consoleCancellation, chatSession, session);
             }
         }
 
@@ -72,7 +74,8 @@ namespace AgenticRpg.Cli
         private async Task HandleGameResultAsync(
             GameTurnResult gameResult,
             ConsoleCancellation consoleCancellation,
-            IChatSession chatSession)
+            IChatSession chatSession,
+            Session session)
         {
             if (gameResult is GameTurnResult.Handled handled)
             {
@@ -91,7 +94,7 @@ namespace AgenticRpg.Cli
             }
             else if (gameResult is GameTurnResult.DelegateToLlm delegated)
             {
-                await RunAgentChat(consoleCancellation, chatSession, delegated.Input);
+                await RunAgentChat(consoleCancellation, chatSession, session, delegated.Input);
             }
             else if (gameResult is GameTurnResult.InvalidInput invalid)
             {
@@ -104,13 +107,17 @@ namespace AgenticRpg.Cli
         }
 
 
-        private async Task RunAgentChat(ConsoleCancellation consoleCancellation, IChatSession chatSession, string input)
+        private async Task RunAgentChat(
+            ConsoleCancellation consoleCancellation,
+            IChatSession chatSession,
+            Session session,
+            string input)
         {
             var cancellationToken = consoleCancellation.BeginRequest();
 
             try
             {
-                var response = await chatSession.SendAsync(input, cancellationToken);
+                var response = await chatSession.SendAsync(input, session, cancellationToken);
 
                 Console.WriteLine();
                 Console.WriteLine(response.Text);

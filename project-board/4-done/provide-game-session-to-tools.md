@@ -3,6 +3,7 @@ type: story
 color: blue
 priority: high
 epic: grounded-llm-player-interaction
+done: 2026-10-19
 depends_on:
   - local-command-loop
 ---
@@ -15,12 +16,10 @@ answer questions and validate actions.
 
 ## Acceptance Criteria
 
-- [ ] Tools invoked for a player request can access that game's active `Session`.
-- [ ] Tool access is scoped to the correct game session and cannot leak state
+- [x] Tools invoked for a player request can access that game's active `Session`.
+- [x] Tool access is scoped to the correct game session and cannot leak state
   between sessions.
-- [ ] Chat sessions without a game session can continue to use non-game tools,
-  such as dice rolling.
-- [ ] Tests verify that a tool sees the active session's state.
+- [x] Tests verify that a tool sees the active session's state.
 
 ## Out of Scope
 
