@@ -15,6 +15,9 @@ namespace AgenticRpg.Core.Engine
         {
             return command switch
             {
+                GameCommand.Inventory =>
+                    ExecuteInventory(session),
+
                 GameCommand.Look =>
                     ExecuteLook(session),
 
@@ -27,6 +30,30 @@ namespace AgenticRpg.Core.Engine
                 _ => throw new InvalidOperationException(
                     $"Don't know how to handle GameCommand {command.GetType().Name}")
             };
+        }
+
+
+        private static CommandResult.Completed ExecuteInventory(Session session)
+        {
+            var items = session.World.Items
+                .Where(item => item.Location is ItemLocation.InPlayerInventory)
+                .OrderBy(item => item.Name)
+                .ToList();
+
+            if (items.Count == 0)
+            {
+                return new CommandResult.Completed("Your inventory is empty.");
+            }
+
+            var builder = new StringBuilder();
+            builder.AppendLine("You are carrying:");
+
+            foreach (var item in items)
+            {
+                builder.AppendLine($"- {item.Name}");
+            }
+
+            return new CommandResult.Completed(builder.ToString());
         }
 
 

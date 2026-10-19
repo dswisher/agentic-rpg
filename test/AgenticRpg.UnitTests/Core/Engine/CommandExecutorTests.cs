@@ -77,6 +77,44 @@ namespace AgenticRpg.UnitTests.Core.Engine
 
 
         [Fact]
+        public void InventoryShowsOnlyItemsInPlayerInventory()
+        {
+            // Arrange
+            var session = CreateSession();
+            var firstItem = session.World.Items.Single(item => item.Id == "item-1");
+            var scroll = session.World.Items.Single(item => item.Id == "ancient-scroll");
+            firstItem.Location = new ItemLocation.InPlayerInventory();
+            scroll.Location = new ItemLocation.InPlayerInventory();
+
+            // Act
+            var result = executor.Execute(session, new GameCommand.Inventory());
+
+            // Assert
+            var completed = result.Should().BeOfType<CommandResult.Completed>().Which;
+
+            completed.Message.Should().Contain("First Item");
+            completed.Message.Should().Contain("Ancient Scroll");
+            completed.Message.Should().NotContain("Second Item");
+        }
+
+
+        [Fact]
+        public void EmptyInventoryIsReported()
+        {
+            // Arrange
+            var session = CreateSession();
+
+            // Act
+            var result = executor.Execute(session, new GameCommand.Inventory());
+
+            // Assert
+            var completed = result.Should().BeOfType<CommandResult.Completed>().Which;
+
+            completed.Message.Should().Be("Your inventory is empty.");
+        }
+
+
+        [Fact]
         public void CanTakeItemInCurrentRoomByNamePart()
         {
             // Arrange
