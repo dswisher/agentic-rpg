@@ -76,7 +76,7 @@ namespace AgenticRpg.Tui
                 void OnInitialLayout(object? sender, LayoutEventArgs e)
                 {
                     gameWindow.SubViewsLaidOut -= OnInitialLayout;
-                    DisplayGameResult(initialLook);
+                    DisplayGameResult("look", initialLook);
                 }
 
                 gameWindow.SubViewsLaidOut += OnInitialLayout;
@@ -140,7 +140,7 @@ namespace AgenticRpg.Tui
 
                 if (gameResult is not GameTurnResult.DelegateToLlm delegated)
                 {
-                    DisplayGameResult(gameResult);
+                    DisplayGameResult(text, gameResult);
                     return;
                 }
 
@@ -160,20 +160,23 @@ namespace AgenticRpg.Tui
         }
 
 
-        private void DisplayGameResult(GameTurnResult gameResult)
+        private void DisplayGameResult(string input, GameTurnResult gameResult)
         {
             switch (gameResult)
             {
                 case GameTurnResult.Handled { Result: CommandResult.Completed completed }:
                     window!.AddGmMessage(completed.Message);
+                    chat!.RecordLocalTurn(input, completed.Message);
                     break;
 
                 case GameTurnResult.Handled { Result: CommandResult.Rejected rejected }:
                     window!.AddGmMessage(rejected.Message);
+                    chat!.RecordLocalTurn(input, rejected.Message);
                     break;
 
                 case GameTurnResult.InvalidInput invalid:
                     window!.AddGmMessage(invalid.Reason);
+                    chat!.RecordLocalTurn(input, invalid.Reason);
                     break;
 
                 case GameTurnResult.NoOp:
@@ -194,10 +197,6 @@ namespace AgenticRpg.Tui
             try
             {
                 var response = await chat!.SendAsync(input, gameSession, ct);
-
-                logger.LogInformation("*** Turn completed ***\n-> Input:\n{Input}\n-> Output:\n{Output}\n-> Tokens: input={InputTokens}, output={OutputTokens}, total={TotalTokens}.",
-                    input, response.Text,
-                    response.Usage?.InputTokenCount, response.Usage?.OutputTokenCount, response.Usage?.TotalTokenCount);
 
                 window!.AddGmMessage(response.Text);
             }

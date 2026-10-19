@@ -16,30 +16,36 @@ namespace AgenticRpg.Tui
                 Description = "Name of the chat model to use.",
             };
 
+            var debugOption = new Option<bool?>("--debug")
+            {
+                Description = "Enable debug logging.",
+            };
+
             var verboseOption = new Option<bool?>("--verbose")
             {
                 Description = "Enable verbose logging.",
             };
 
-            var root = new RootCommand("Agentic RPG") { modelOption, verboseOption };
+            var root = new RootCommand("Agentic RPG") { modelOption, debugOption, verboseOption };
 
             root.SetAction(parseResult =>
             {
                 var model = parseResult.GetValue(modelOption);
                 var verbose = parseResult.GetValue(verboseOption) ?? false;
+                var debug = parseResult.GetValue(debugOption) ?? false;
 
-                return RunGame(model, verbose);
+                return RunGame(model, debug, verbose);
             });
 
             return root.Parse(args).Invoke();
         }
 
 
-        private static int RunGame(string? modelName, bool verbose)
+        private static int RunGame(string? modelName, bool debug, bool verbose)
         {
             try
             {
-                using (var container = Container.CreateContainer(modelName, verbose))
+                using (var container = Container.CreateContainer(modelName, debug, verbose))
                 {
                     var gameApp = container.GetRequiredService<GameApp>();
 

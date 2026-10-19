@@ -14,5 +14,7 @@ namespace AgenticRpg.Core.Agents
             string input,
             Session gameSession,
             CancellationToken cancellationToken = default);
+
+        void RecordLocalTurn(string input, string output);
     }
 }

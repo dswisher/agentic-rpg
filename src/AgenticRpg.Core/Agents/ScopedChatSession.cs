@@ -20,11 +20,18 @@ namespace AgenticRpg.Core.Agents
             this.inner = inner;
         }
 
+
         public Task<ChatResponse> SendAsync(
             string input,
             Session gameSession,
             CancellationToken cancellationToken = default) =>
             inner.SendAsync(input, gameSession, cancellationToken);
+
+
+        public void RecordLocalTurn(string input, string output)
+        {
+            inner.RecordLocalTurn(input, output);
+        }
 
 
         public void Dispose() => scope.Dispose();

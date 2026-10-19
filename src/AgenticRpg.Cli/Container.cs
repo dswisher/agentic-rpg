@@ -1,6 +1,8 @@
 // Copyright (c) Doug Swisher. All Rights Reserved.
 // Licensed under the MIT License. See LICENSE.md in the project root for license information.
 
+using System;
+using System.IO;
 using AgenticRpg.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -16,12 +18,17 @@ namespace AgenticRpg.Cli
             var services = new ServiceCollection();
 
             // Set up logging
+            // ~/.local/state/agentic-rpg/cli.log
+            var userRoot = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            var logPath = Path.Combine(userRoot, ".local", "state", "agentic-rpg", "cli.log");
+            Directory.CreateDirectory(Path.GetDirectoryName(logPath)!);
+            File.Delete(logPath);
+
             var serilog = new LoggerConfiguration()
                 .MinimumLevel.Information()
                 .Enrich.FromLogContext()
-                .Enrich.With<ShortSourceContextEnricher>()
-                .WriteTo.Console(outputTemplate:
-                    "{Timestamp:HH:mm:ss} [{Level:u3}] {SourceContextShort,-18}: {Message:lj}{NewLine}{Exception}")
+                .WriteTo.File(logPath, outputTemplate:
+                    "{Timestamp:HH:mm:ss.fff} [{Level:u3}] {SourceContext:l}: {Message:lj}{NewLine}{Exception}")
                 .CreateLogger();
 
             services.AddLogging(logging =>

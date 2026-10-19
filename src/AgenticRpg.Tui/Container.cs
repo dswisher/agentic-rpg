@@ -12,7 +12,7 @@ namespace AgenticRpg.Tui
 {
     public static class Container
     {
-        public static ServiceProvider CreateContainer(string? modelName, bool verbose)
+        public static ServiceProvider CreateContainer(string? modelName, bool debug, bool verbose)
         {
             // Create the collection that we'll populate with goodies
             var services = new ServiceCollection();
@@ -29,6 +29,10 @@ namespace AgenticRpg.Tui
             if (verbose)
             {
                 logConfig.MinimumLevel.Verbose();
+            }
+            else if (debug)
+            {
+                logConfig.MinimumLevel.Debug();
             }
             else
             {

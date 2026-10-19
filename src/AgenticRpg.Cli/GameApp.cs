@@ -39,11 +39,7 @@ namespace AgenticRpg.Cli
             var session = sessionBuilder.Build();
 
             // Show the player where they are before accepting input.
-            await HandleGameResultAsync(
-                gameProcessor.Process(session, "look"),
-                consoleCancellation,
-                chatSession,
-                session);
+            await HandleGameResultAsync(gameProcessor.Process(session, "look"), consoleCancellation, chatSession, session, "look");
 
             while (true)
             {
@@ -66,7 +62,7 @@ namespace AgenticRpg.Cli
                 }
 
                 var gameResult = gameProcessor.Process(session, input);
-                await HandleGameResultAsync(gameResult, consoleCancellation, chatSession, session);
+                await HandleGameResultAsync(gameResult, consoleCancellation, chatSession, session, input);
             }
         }
 
@@ -75,17 +71,20 @@ namespace AgenticRpg.Cli
             GameTurnResult gameResult,
             ConsoleCancellation consoleCancellation,
             IChatSession chatSession,
-            Session session)
+            Session session,
+            string input)
         {
             if (gameResult is GameTurnResult.Handled handled)
             {
                 if (handled.Result is CommandResult.Completed completed)
                 {
                     Console.WriteLine(completed.Message);
+                    chatSession.RecordLocalTurn(input, completed.Message);
                 }
                 else if (handled.Result is CommandResult.Rejected rejected)
                 {
                     Console.WriteLine(rejected.Message);
+                    chatSession.RecordLocalTurn(input, rejected.Message);
                 }
                 else
                 {
@@ -99,6 +98,7 @@ namespace AgenticRpg.Cli
             else if (gameResult is GameTurnResult.InvalidInput invalid)
             {
                 Console.WriteLine(invalid.Reason);
+                chatSession.RecordLocalTurn(input, invalid.Reason);
             }
             else if (gameResult is not GameTurnResult.NoOp)
             {
@@ -122,11 +122,6 @@ namespace AgenticRpg.Cli
                 Console.WriteLine();
                 Console.WriteLine(response.Text);
                 Console.WriteLine();
-
-                if (response.Usage is { } usage)
-                {
-                    logger.LogInformation("...tokens: input={InputTokens}, output={OutputTokens}, total={TotalTokens}.", usage.InputTokenCount, usage.OutputTokenCount, usage.TotalTokenCount);
-                }
             }
             catch (OperationCanceledException)
             {
@@ -135,6 +130,7 @@ namespace AgenticRpg.Cli
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error getting response from chat client: {ex.Message}");
                 logger.LogError(ex, "Error getting response from chat client.");
             }
             finally

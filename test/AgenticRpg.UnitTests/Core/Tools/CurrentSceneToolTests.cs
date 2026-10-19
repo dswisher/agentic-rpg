@@ -8,18 +8,26 @@ using AgenticRpg.Core.Tools;
 using AgenticRpg.UnitTests.TestHelpers;
 using AwesomeAssertions;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
 namespace AgenticRpg.UnitTests.Core.Tools
 {
     public class CurrentSceneToolTests
     {
+        private readonly CurrentSceneTool sceneTool;
+
+        public CurrentSceneToolTests()
+        {
+            sceneTool = new CurrentSceneTool(NullLogger<CurrentSceneTool>.Instance);
+        }
+
+
         [Fact]
         public async Task ReturnsOnlyTheFirstRoomScene()
         {
             // Arrange
             var session = TestWorldBuilder.CreateSession();
-            var sceneTool = new CurrentSceneTool();
             var function = sceneTool.Create(session);
 
             // Act
@@ -49,7 +57,6 @@ namespace AgenticRpg.UnitTests.Core.Tools
         {
             // Arrange
             var session = TestWorldBuilder.CreateSession();
-            var sceneTool = new CurrentSceneTool();
             var function = sceneTool.Create(session);
 
             // Act

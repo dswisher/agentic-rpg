@@ -4,6 +4,7 @@
 using System.Linq;
 using AgenticRpg.Core.Models.World;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Logging;
 
 namespace AgenticRpg.Core.Tools
 {
@@ -16,6 +17,14 @@ namespace AgenticRpg.Core.Tools
 
     public class CurrentSceneTool : IGameTool
     {
+        private readonly ILogger<CurrentSceneTool> logger;
+
+        public CurrentSceneTool(ILogger<CurrentSceneTool> logger)
+        {
+            this.logger = logger;
+        }
+
+
         public AIFunction Create(Session session)
         {
             return AIFunctionFactory.Create(
@@ -25,7 +34,7 @@ namespace AgenticRpg.Core.Tools
         }
 
 
-        private static CurrentScene GetCurrentScene(Session session)
+        private CurrentScene GetCurrentScene(Session session)
         {
             var room = session.World.Rooms.Single(x => x.Id == session.Player.CurrentRoomId);
 
@@ -41,6 +50,9 @@ namespace AgenticRpg.Core.Tools
                 .OrderBy(exit => exit.Name)
                 .Select(exit => exit.Name)
                 .ToArray();
+
+            logger.LogInformation("...get_current_scene called, room {RoomId}, with {NumExits} exits and {NumItems} items...",
+                room.Id, exitDirections.Length, visibleItems.Length);
 
             return new CurrentScene(room.Name, room.Description, visibleItems, exitDirections);
         }

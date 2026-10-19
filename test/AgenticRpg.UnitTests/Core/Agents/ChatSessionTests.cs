@@ -29,7 +29,8 @@ namespace AgenticRpg.UnitTests.Core.Agents
             var gameTool = new CurrentRoomIdTool();
             var chatSession = new ChatSession(
                 wrapper,
-                [gameTool, new DieRoller(NullLogger<DieRoller>.Instance)]);
+                [gameTool, new DieRoller(NullLogger<DieRoller>.Instance)],
+                NullLogger<ChatSession>.Instance);
             var gameSession = CreateSession("first-room");
 
             // Act
@@ -65,7 +66,8 @@ namespace AgenticRpg.UnitTests.Core.Agents
             var gameTool = new CurrentRoomIdTool();
             var chatSession = new ChatSession(
                 wrapper,
-                [gameTool, new DieRoller(NullLogger<DieRoller>.Instance)]);
+                [gameTool, new DieRoller(NullLogger<DieRoller>.Instance)],
+                NullLogger<ChatSession>.Instance);
             var firstSession = CreateSession("first-room");
             var secondSession = CreateSession("second-room");
 
