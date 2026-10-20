@@ -3,6 +3,7 @@ type: story
 color: blue
 priority: high
 epic: grounded-llm-player-interaction
+done: 2026-10-19
 depends_on:
   - provide-game-session-to-tools
 ---
@@ -16,12 +17,16 @@ it?” from the item's description instead of inventing its properties.
 
 ## Acceptance Criteria
 
-- [ ] The tool resolves an item by a player-provided name or unambiguous alias.
-- [ ] The tool returns the item's authoritative name and description only when
+- [x] The tool resolves an item by its full name or an unambiguous complete word
+  from its name (for example, “scroll” for “Ancient Scroll”).
+- [x] The tool returns the item's authoritative name and description only when
   it is in the current room or the player's inventory.
-- [ ] The tool reports missing, inaccessible, or ambiguous items without
-  returning hidden item details.
-- [ ] Tests cover visible, carried, inaccessible, missing, and ambiguous items.
+- [x] The tool reports when there is no accessible match or when the request is
+  ambiguous, without returning item details for either result.
+- [x] The tool searches only items in the current room and the player's
+  inventory; it does not determine whether an inaccessible item exists
+  elsewhere in the world.
+- [x] Tests cover visible, carried, no-accessible-match, and ambiguous results.
 
 ## Sample Player Inputs
 
@@ -32,7 +37,8 @@ it?” from the item's description instead of inventing its properties.
     invent a translation.
 - **At Briar Gate, where the scroll is not visible:** “What does the ancient
   scroll say?”
-  - Expected: the tool does not return the scroll's description; explain that
-    it cannot be inspected from here rather than revealing its details.
+  - Expected: the tool returns no accessible match without searching elsewhere
+    in the world; explain that the item cannot be inspected here or from the
+    player's inventory, without claiming whether it exists elsewhere.
 - **With two accessible items matching “key”:** “What does the key look like?”
   - Expected: ask which item the player means; do not choose one arbitrarily.

@@ -21,6 +21,7 @@ recording. Local commands remain the preferred path for routine actions.
 - **Get Current Scene** — Expose only the player's current room and visible features.
 - **Get Player Inventory** — Expose only the items the player carries.
 - **Inspect Visible Item** — Return details for an item the player can currently access.
+- **Move Through Exit** — Let the LLM move the player through one valid exit based on an explicit natural-language request.
 - **Take Visible Item** — Let the LLM pick up one explicitly requested, accessible item.
 - **Tune Grounded LLM Instructions** — Guide and evaluate tool use and factual grounding.
 

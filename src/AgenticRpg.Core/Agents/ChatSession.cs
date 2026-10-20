@@ -60,6 +60,7 @@ namespace AgenticRpg.Core.Agents
                                For questions about the current room, surroundings, visible items, exits, or what can be investigated, call get_current_scene during this turn—even if earlier messages describe the scene.
                                Treat its latest result as authoritative, not prior conversation.
                                For questions about what the player is currently carrying, call get_player_inventory during this turn—even if earlier messages list items. Treat its latest result as authoritative, and do not claim the player has items absent from it.
+                               For questions about an item's details, call inspect_visible_item during this turn. Treat its result as authoritative and do not invent properties. If there is no accessible match, do not infer whether the item exists elsewhere; if the request is ambiguous, ask the player to clarify.
                                """,
                 Tools = tools,
 
