@@ -87,6 +87,7 @@ visual category hints and may become more meaningful as the project grows:
 - `yellow` — LLM command integration
 - `magenta` — NPC world simulation
 - `cyan` — generated world content
+- `orange` — TUI improvements
 
 Epic types and dependencies describe workflow and prerequisites; colors are not
 used for ordering or dependency behavior.
