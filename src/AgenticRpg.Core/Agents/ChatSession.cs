@@ -38,6 +38,7 @@ namespace AgenticRpg.Core.Agents
         public async Task<ChatResponse> SendAsync(
             string input,
             Session gameSession,
+            IProgress<ChatProgress>? progress = null,
             CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(gameSession);
@@ -81,6 +82,11 @@ namespace AgenticRpg.Core.Agents
                                cancellationToken).ConfigureAwait(false))
             {
                 updates.Add(update);
+
+                foreach (var call in update.Contents.OfType<FunctionCallContent>())
+                {
+                    progress?.Report(new ChatProgress.ToolCallRequested(call.Name));
+                }
 
                 LogAgentUpdate(update);
             }

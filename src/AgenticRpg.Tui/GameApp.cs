@@ -2,7 +2,9 @@
 // Licensed under the MIT License. See LICENSE.md in the project root for license information.
 
 using System;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AgenticRpg.Core.Agents;
@@ -70,11 +72,12 @@ namespace AgenticRpg.Tui
                 session = sessionBuilder.Build();
 
                 // Wait until the window has its real layout before adding the first chat entry.
-                // Otherwise the chat pane can calculate its initial scroll position using an
+                // Otherwise, the chat pane can calculate its initial scroll position using an
                 // uninitialized viewport and clip the top of the room description.
                 var initialLook = gameProcessor.Process(session, "look");
                 void OnInitialLayout(object? sender, LayoutEventArgs e)
                 {
+                    // ReSharper disable once AccessToDisposedClosure
                     gameWindow.SubViewsLaidOut -= OnInitialLayout;
                     DisplayGameResult("look", initialLook);
                 }
@@ -114,6 +117,26 @@ namespace AgenticRpg.Tui
         }
 
 
+        private void RefreshLocation()
+        {
+            var roomId = session!.Player.CurrentRoomId;
+            var roomName = session.World.Rooms.Single(x => x.Id == roomId).Name;
+
+            var inventory = session.World.Items.Where(x => x.Location is ItemLocation.InPlayerInventory)
+                .OrderBy(x => x.Name)
+                .Select(x => x.Name)
+                .ToList();
+            var itemCount = inventory.Count;
+            inventory = [.. inventory.Take(5)];
+            if (itemCount > 5)
+            {
+                inventory.Add($"({itemCount - 5} more)");
+            }
+
+            window?.StatusPane.SetLocation(roomName, inventory);
+        }
+
+
         private void OnCancelRequested(object? sender, EventArgs e)
         {
             turnCts?.Cancel();
@@ -125,6 +148,7 @@ namespace AgenticRpg.Tui
             if (window != null && !turnActive)
             {
                 window.AddPlayerMessage(text);
+                window.StatusPane.HideExchange();
 
                 GameTurnResult gameResult;
                 try
@@ -189,34 +213,68 @@ namespace AgenticRpg.Tui
                     throw new InvalidOperationException(
                         $"Don't know how to handle game result of type {gameResult.GetType().Name}");
             }
+
+            RefreshLocation();
         }
 
 
         private async Task RunTurnAsync(string input, Session gameSession, CancellationToken ct)
         {
+            var statusPane = window!.StatusPane;
+            statusPane.BeginExchange();
+            var timer = Stopwatch.StartNew();
+
+            // The progress callback is invoked on the UI thread, so it can safely update the status pane.
+            var progress = new Progress<ChatProgress>(p =>
+            {
+                switch (p)
+                {
+                    case ChatProgress.ToolCallRequested toolCall:
+                        statusPane.AddToolCall(toolCall.Name);
+                        break;
+                }
+            });
+
+            var tick = app!.AddTimeout(TimeSpan.FromSeconds(1), () =>
+            {
+                statusPane.SetElapsed(timer.Elapsed);
+                return true;
+            });
+
             try
             {
-                var response = await chat!.SendAsync(input, gameSession, ct);
+                var response = await chat!.SendAsync(input, gameSession, progress, ct);
 
                 window!.AddGmMessage(response.Text);
+
+                statusPane.CompleteExchange(response.Usage?.InputTokenCount, response.Usage?.OutputTokenCount, timer.Elapsed);
             }
             catch (OperationCanceledException) when (ct.IsCancellationRequested)
             {
                 window!.AddSystemMessage("[cancelled]");
+                statusPane.CompleteExchange(null, null, timer.Elapsed);
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Turn failed.");
                 window!.AddSystemMessage($"[error: {ex.Message}]");
+                statusPane.CompleteExchange(null, null, timer.Elapsed);
             }
             finally
             {
+                if (tick != null)
+                {
+                    app?.RemoveTimeout(tick);
+                }
+
                 window?.SetBusy(false);
                 turnActive = false;
                 if (quitPending)
                 {
                     app?.RequestStop(window);
                 }
+
+                RefreshLocation();
             }
         }
 

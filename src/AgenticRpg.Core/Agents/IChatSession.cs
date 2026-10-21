@@ -1,6 +1,7 @@
 // Copyright (c) Doug Swisher. All Rights Reserved.
 // Licensed under the MIT License. See LICENSE.md in the project root for license information.
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using AgenticRpg.Core.Models.World;
@@ -13,6 +14,7 @@ namespace AgenticRpg.Core.Agents
         Task<ChatResponse> SendAsync(
             string input,
             Session gameSession,
+            IProgress<ChatProgress>? progress = null,
             CancellationToken cancellationToken = default);
 
         void RecordLocalTurn(string input, string output);

@@ -117,7 +117,7 @@ namespace AgenticRpg.Cli
 
             try
             {
-                var response = await chatSession.SendAsync(input, session, cancellationToken);
+                var response = await chatSession.SendAsync(input, session, cancellationToken: cancellationToken);
 
                 Console.WriteLine();
                 Console.WriteLine(response.Text);

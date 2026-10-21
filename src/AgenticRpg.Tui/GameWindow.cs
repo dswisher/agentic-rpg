@@ -16,6 +16,7 @@ namespace AgenticRpg.Tui
         private readonly TextField inputField;
         private readonly FrameView chatPane;
         private readonly FrameView inputPane;
+        private readonly StatusPane statusPane;
 
         private View? lastEntry;
         private bool busy;
@@ -33,7 +34,7 @@ namespace AgenticRpg.Tui
             Height = Dim.Fill();
 
             (inputPane, inputField) = BuildInputPane();
-            var statusPane = BuildStatusPane(inputPane);
+            statusPane = new StatusPane(inputPane);
             chatPane = BuildChatPane(statusPane, inputPane);
 
             Add(chatPane, statusPane, inputPane);
@@ -43,6 +44,8 @@ namespace AgenticRpg.Tui
             inputField.SetFocus();
         }
 
+
+        public StatusPane StatusPane => statusPane;
 
         public event EventHandler<string>? MessageSubmitted;
         public event EventHandler? CancelRequested;
@@ -75,27 +78,6 @@ namespace AgenticRpg.Tui
             inPane.Add(inField);
 
             return (inPane, inField);
-        }
-
-
-        private static FrameView BuildStatusPane(View inputPane)
-        {
-            // Add the status pane, with a couple of placeholder labels
-            FrameView statusPane = new()
-            {
-                Title = "Status",
-                X = Pos.AnchorEnd(),
-                Y = 0,
-                Width = 45,
-                Height = Dim.Fill(to: inputPane)
-            };
-
-            statusPane.Add(
-                new Label { Text = "Location: Starting area", X = 1, Y = 1 },
-                new Label { Text = "Health: 100", X = 1, Y = 2 }
-            );
-
-            return statusPane;
         }
 
 
