@@ -3,6 +3,21 @@
 Exploring the use of LLMs to act like a GM to help run an RPG.
 
 
+## Status
+
+I am putting this project on hold, at least for now.
+The primary goal was for me to learn about MEAI and how agents work at a deeper level than just using OpenCode provides.
+That goal has been achieved - I am no expert, but I've learned a lot.
+
+The premise of advancing to an RPG was to see if world state exposed through AI tools could be leveraged by an agent.
+So far, the answer seems to be "no".
+The agents I've experimented with (at least the ones cheap enough to use for this purpose) seem to skip calling the tools, and just make stuff up.
+I'm new to context engineering, so I'm sure things could be improved.
+But even a simple setup, where the context explicitly tells the agent to call the tool does not suffice.
+
+I'd love to come back to this at some point, but I have no idea when that might be.
+
+
 ## Setup
 
 The config lives outside the repo, in `~/.config/agentic-rpg/`, and comes in two parts.
